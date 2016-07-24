@@ -1,4 +1,4 @@
-setwd("/Users/kate.hu/addhazard_shiny")
+setwd("/Users/kate.hu/addhazard_shiny") # to do: finish
 #data<-read.csv("aric.csv", header=TRUE)
 #aric$survtime<-aric$SURVTIME+runif(dim(aric)[1],0,1)*1e-8
 #write.csv(aric, file="newaric.csv")
