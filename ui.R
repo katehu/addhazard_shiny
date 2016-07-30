@@ -7,7 +7,7 @@ ui <- dashboardPage(
                   # Model for Survival Analysis"),
   dashboardSidebar(
    sidebarMenu(
-      menuItem(strong("Dashboard", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
+      menuItem(strong("Intro", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
       menuItem(strong("Data", style="font-size: 14pt"), tabName = "data", icon = icon("database")),
       menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("yahoo")),
      # menuItem("Sampling", tabName = "sampling", icon = icon("bitbucket")),
@@ -22,11 +22,17 @@ ui <- dashboardPage(
                 fluidPage(
                   titlePanel("Introduction"),
                   
-                  p("This web app is a tool for fitting single- and two-phase additive hazards models, 
-                          estimating parameter estimates and their model-based or robust standard errors, and  
-                          visualizing predicted individual-specific hazards.", 
-                          style = "font-family: 'Calibri'; font-size: 14pt"),
+                  p("This web app is a tool for obtaining parameter estimates from single- and 
+                    two-phase additive hazards models and visualizing predicted individual-specific hazards.
+                    For fitting two-phase models with auxiliary information, it also supports in-app 
+                    calculation of calibration variables.", 
+                    style = "font-family: 'Calibri'; font-size: 14pt"),
                   
+                  p("Currently supported input file types include comma separated values, Excel spreadsheets,
+                    delimited text files, as well as SAS, Stata (up to Version 12), and SPSS data sets. 
+                    Estimates with model-based or robust standard errors and figures may be downloaded for further manipulation.",
+                    style = "font-family: 'Calibri'; font-size: 14pt"),
+  
                   p("Documentation for the associated R package may be found", 
                   a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"), 
                     style = "font-family: 'Calibri'; font-size: 14pt")
@@ -55,7 +61,7 @@ ui <- dashboardPage(
                                    'Double Quote'='"',
                                    'Single Quote'="'"),
                                  '"'),
-                    fileInput('file1', 'Choose File (.csv, .xlsx, .txt, .dta, .sav)',
+                    fileInput('file1', 'Choose File (.csv, .xlsx, .txt, .dta, .sav, .sas7bdat)',
                               accept=c('text/csv',
                                        'text/comma-separated-values,text/plain',
                                        '.csv')),

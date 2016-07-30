@@ -1,10 +1,4 @@
-# setwd("/Users/kate.hu/addhazard_shiny") # to do: finish
-# to do: kate
-# practice
-#data<-read.csv("aric.csv", header=TRUE)
-#aric$survtime<-aric$SURVTIME+runif(dim(aric)[1],0,1)*1e-8
-#write.csv(aric, file="newaric.csv")
-#data<-read.csv("newaric.csv", header=TRUE)
+# setwd("/Users/kate.hu/addhazard_shiny") 
 
 sourceDir <- function(path, trace = TRUE, ...) {
   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
@@ -16,8 +10,10 @@ sourceDir <- function(path, trace = TRUE, ...) {
 # sourceDir("/Users/kate.hu/Documents/ah/R",trace=TRUE)
 library(shiny)
 library(xtable)
-library("addhazard")
-library("survival")
+library(addhazard)
+library(survival)
+
+## packages required for file imports: memisc, xlsx, foreign, sas7bdat
 
 shinyServer(function(input, output) {
   
@@ -45,7 +41,11 @@ shinyServer(function(input, output) {
          
    } else if (substr(inFile[[1]], k-2, k) == "sav"){
       library(memisc)
-      dat <- as.data.set(spss.system.file(inFile$datapath))
+      dat <- as.data.frame(as.data.set(spss.system.file(inFile$datapath)))
+   
+   } else if (substr(inFile[[1]], k-7, k) == "sas7bdat"){
+      library(sas7bdat)
+      dat <- read.sas7bdat(inFile$datapath)
    }
    
    dat <-data.frame(dat)
@@ -190,9 +190,9 @@ shinyServer(function(input, output) {
 #   }
 #  })
 
-
-
-#  formula<-Surv(survtime,CHD)~crp+AGE+SEX+RACE+as.factor(SMOK)+SBP+LDL+HDL+DIABTS
- # fit1.2<-ah.2ph(formula,data=aric.LDL, R=aric.LDL$R, Pi=1/aric.LDL$wts, robust=robust,ties=FALSE)
-  #su
-  
+# data<-read.csv("aric.csv", header=TRUE)
+# aric$survtime<-aric$SURVTIME+runif(dim(aric)[1],0,1)*1e-8
+# write.csv(aric, file="newaric.csv")
+# data<-read.csv("newaric.csv", header=TRUE)
+# formula<-Surv(survtime,CHD)~crp+AGE+SEX+RACE+as.factor(SMOK)+SBP+LDL+HDL+DIABTS
+# fit1.2<-ah.2ph(formula,data=aric.LDL, R=aric.LDL$R, Pi=1/aric.LDL$wts, robust=robust,ties=FALSE)
