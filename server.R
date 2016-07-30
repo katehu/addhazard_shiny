@@ -65,7 +65,6 @@ shinyServer(function(input, output) {
         inFile <- input$file1
         if (is.null(inFile))
            return(NULL) else
-        #read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
            return(data())
       }, options = list(pageLength = 10))
   
@@ -121,11 +120,6 @@ shinyServer(function(input, output) {
 #    }
 # })
 
-# output$plot <- renderPlot({
-#   dat <- get(input$dataset)
-#   hist(input$surv)
-# })
-
   ## "Fit Model" button
   observeEvent(input$fitModel, {
   
@@ -160,39 +154,28 @@ shinyServer(function(input, output) {
       # ah.2ph() options: robust = T/F; R (indicator for being in phase 2; Pi: Pr(subject selected to phase 2 subsample)
       # calibration.variables: used to calibrate the weights
       
-      # output$modelSummary <- renderPrint({   
-      #     summary(fit1)  ## for checking purposes
-      # })
-      
       output$regTab <- renderTable({
           # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
-          summary(fit1)$coef
-      }, caption = "Table 1. Regression Output")
+            summary(fit1)$coef
+      }, caption = "Table 1. Parameter estimates with 95% confidence intervals.")
       
   
   }) # end observeEvent
   
+  output$plot <- renderPlot({
+    inFile <- input$file1
+    dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
+    
+    if (is.na(input$nbreaks)){
+      hist(dat[, unlist(input$surv)], main='', xlab="Survival Times", 
+           probability = input$histprob, 
+           col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+    } else {
+      hist(dat[, unlist(input$surv)], main='', xlab="Survival Times", 
+           probability = input$histprob, breaks = input$nbreaks,
+           col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+    }
+    
+  }) 
+  
 }) ## end document
-
-# runRegression <- reactive({
-#   #f1<-ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),data=data, ties=FALSE)
-#   #mysummary(f1)$coef
-#   
-#   lm(as.formula(paste(input$surv," ~ ",paste(input$covariates,collapse="+"))),data=data)
-#   
-#   })
-
-# output$regTab <- renderTable({
-#   if(!is.null(input$covariates)){
-#     summary(runRegression())$coefficients
-#   } else {
-#     print(data.frame(Warning="Please select Model Parameters."))
-#   }
-#  })
-
-# data<-read.csv("aric.csv", header=TRUE)
-# aric$survtime<-aric$SURVTIME+runif(dim(aric)[1],0,1)*1e-8
-# write.csv(aric, file="newaric.csv")
-# data<-read.csv("newaric.csv", header=TRUE)
-# formula<-Surv(survtime,CHD)~crp+AGE+SEX+RACE+as.factor(SMOK)+SBP+LDL+HDL+DIABTS
-# fit1.2<-ah.2ph(formula,data=aric.LDL, R=aric.LDL$R, Pi=1/aric.LDL$wts, robust=robust,ties=FALSE)

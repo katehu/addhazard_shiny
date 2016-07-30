@@ -4,13 +4,11 @@ library(shinydashboard)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Additive Hazards"),
-                  # Model for Survival Analysis"),
   dashboardSidebar(
    sidebarMenu(
       menuItem(strong("Intro", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
       menuItem(strong("Data", style="font-size: 14pt"), tabName = "data", icon = icon("database")),
       menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("yahoo")),
-     # menuItem("Sampling", tabName = "sampling", icon = icon("bitbucket")),
       menuItem(strong("Results", style="font-size: 14pt"), tabName = "results", icon = icon("magic")),
       menuItem(strong("Plots", style="font-size: 14pt"), tabName = "plots", icon = icon("line-chart"))
 
@@ -71,30 +69,23 @@ ui <- dashboardPage(
                   mainPanel(dataTableOutput('contents'))
                )
            ),
-      # third tab item 
+      
+      # Third tab content 
       tabItem(tabName ="model",
               fluidPage(
                 withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                 
-                sidebarPanel(
+                mainPanel(   
                   uiOutput("surv"),
                   uiOutput("cen"),
                   uiOutput("covariates"),
                   #checkboxInput('wgts', 'Weights', FALSE),
                   #uiOutput("weights"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
-                  
-                  # from Sampling tab
-                  # selectInput("Sampling", "Sampling Scheme:",
-                  #            choices=c("Random Sampling", "Two-phase Sampling")),
-                  #h6("If two-phase sampling:"),
-
-                  #uiOutput("phase1"),
-                  #uiOutput("phase2"),
                   checkboxInput('ties', 'Ties', TRUE),
                   
-                  checkboxInput('twophase', 'Two-Phase Sampling', FALSE),
-                  helpText("Uncheck if records were randomly sampled."),
+                  checkboxInput('twophase', 'Two-Phase Sampling', TRUE),
+                  helpText("Uncheck if records were randomly sampled and disregard below options."),
                   
                   uiOutput("R"),
                   uiOutput("p2probs"),
@@ -106,57 +97,51 @@ ui <- dashboardPage(
                   #         It is a number greater than or equal to 1."),
                   
                   actionButton("fitModel", "Fit Model")  
-                  # verbatimTextOutput("modelSummary")  
-                ),
-                  mainPanel(
-                    tableOutput("regTab")
-                    #textOutput("text1")
-                    )               
+                ) # end mainPanel
               ) # end fluidPage
       ), # end tabItem
       
-      ## fourth tab 
-      tabItem(tabName ="Two-phase Sampling",
-              fluidPage(
-                #  selectInput("Sampling", "Sampling Scheme:",
-                #            choices=c("Random Sampling", "Two-phase Sampling")),
-                #  h6("If two-phase sampling:"),
-
-                  uiOutput("phase1"),
-                  uiOutput("phase2")#,
-                 # uiOutput("R"),
-                 # uiOutput("weights"),
-                 # helpText("The inverse of the phase II selection probability for each subject. It is a number greater or equal to 1."),
-                  # checkboxInput('calibration', 'Calibration', TRUE),
-                  # uiOutput("cal"),
-                  #helpText("Sometimes you need to create new calibration variables based on phase I variables.
-                  #         The key is to find the variables highly correlated with phase II variable ")
-
-              ) # end fluidPage
-          ), # end tabItem
-
-      ## fifth tab
+      ## Fourth tab content
       tabItem( tabName = "results",
         fluidPage(
-          titlePanel("Inference on coefficients"),
+          titlePanel("Inference on Coefficients"),
           mainPanel(
-            plotOutput('plot')
-           # navbarPage(
-              # title = 'DataTable Options',
-            #  tabPanel('Display length',    
-            #           dataTableOutput('table')
-            #  )
-            #)
-          )
+            tableOutput("regTab")
+          ) 
+
          ) # endfluidPage
-       ) # end tabItem
+       ), # end tabItem
+      
+      # navbarPage(
+      #  title = 'DataTable Options',
+      #   tabPanel('Display length',
+      #            dataTableOutput('table1')
+      #   )
+      #  ) # end navbarPage
+      # ), # end tabItem
+      
+      ## Fifth tab content
+      tabItem(tabName ="plots",
+              fluidPage(
+                titlePanel("Plots"),
+                sidebarPanel(
+                  checkboxInput('histprob', 'Show density on y-axis', FALSE),
+                  numericInput('nbreaks', 'Bin width', NA, min = 2, max = 50, step=5, width='150px'),
+                  tags$b("Set histogram color using RGB inputs"),
+                  sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('alpha', 'Opacity level', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
+                ),
+                mainPanel(
+                  plotOutput("plot"),
+                  tags$b("Figure 1. Histogram of survival times.")
+                )
+        
+              ) # end fluidPage
+      ) # end tabItem
+      
      
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
-
-
-
-
-
-
