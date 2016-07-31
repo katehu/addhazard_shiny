@@ -8,6 +8,7 @@ ui <- dashboardPage(
    sidebarMenu(
       menuItem(strong("Intro", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
       menuItem(strong("Data", style="font-size: 14pt"), tabName = "data", icon = icon("database")),
+      menuItem(strong("Explore", style="font-size: 14pt"), tabName = "explore", icon = icon("search")),
       menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("yahoo")),
       menuItem(strong("Results", style="font-size: 14pt"), tabName = "results", icon = icon("magic")),
       menuItem(strong("Plots", style="font-size: 14pt"), tabName = "plots", icon = icon("line-chart"))
@@ -70,6 +71,24 @@ ui <- dashboardPage(
                )
            ),
       
+      tabItem(tabName ="explore",
+              fluidPage(
+                sidebarPanel(
+                  uiOutput("histvar"),
+                  checkboxInput('histprob', 'Show density on y-axis', FALSE),
+                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=5, width='150px'),
+                  tags$b("Set histogram color using RGB inputs"),
+                  sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  sliderInput('alpha', 'Opacity', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
+                ),
+                mainPanel(
+                  plotOutput("hist")#,
+                  #tags$b(paste("Figure 1. Histogram of", input$histvar, "variable."))
+                )
+              )
+      ),
       # Third tab content 
       tabItem(tabName ="model",
               fluidPage(
@@ -140,20 +159,8 @@ ui <- dashboardPage(
       ## Fifth tab content
       tabItem(tabName ="plots",
               fluidPage(
-                titlePanel("Plots"),
-                sidebarPanel(
-                  checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=5, width='150px'),
-                  tags$b("Set histogram color using RGB inputs"),
-                  sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('alpha', 'Opacity level', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
-                ),
-                mainPanel(
-                  plotOutput("plot"),
-                  tags$b("Figure 1. Histogram of survival times.")
-                )
+                titlePanel("Plots")
+              
         
               ) # end fluidPage
       ) # end tabItem

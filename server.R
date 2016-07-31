@@ -68,10 +68,12 @@ shinyServer(function(input, output) {
            return(data())
       }, options = list(pageLength = 10))
   
-
+  output$histvar <- renderUI({
+    selectInput("histvar", label = h4("Check Variable Distribution"), choices = names(data()),
+                selected = NULL)
+  })
  
   output$surv <- renderUI({
-   
     selectInput("surv", label = h5("Survival Outcomes"), choices = names(data()))
   })
   
@@ -162,16 +164,16 @@ shinyServer(function(input, output) {
   
   }) # end observeEvent
   
-  output$plot <- renderPlot({
+  output$hist <- renderPlot({
     inFile <- input$file1
     dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
     
     if (is.na(input$nbreaks)){
-      hist(dat[, unlist(input$surv)], main='', xlab="Survival Times", 
+      hist(dat[, unlist(input$histvar)], main='', xlab=paste(input$histvar), 
            probability = input$histprob, 
            col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
     } else {
-      hist(dat[, unlist(input$surv)], main='', xlab="Survival Times", 
+      hist(dat[, unlist(input$histvar)], main='', xlab=paste(input$histvar), 
            probability = input$histprob, breaks = input$nbreaks,
            col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
     }
