@@ -75,20 +75,36 @@ ui <- dashboardPage(
               fluidPage(
                 withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                 
-                mainPanel(   
+                #mainPanel(   
+                fluidRow(
+                  column(3,
+                  tags$b("General Settings"),
+                  br(),
                   uiOutput("surv"),
                   uiOutput("cen"),
                   uiOutput("covariates"),
-                  #checkboxInput('wgts', 'Weights', FALSE),
-                  #uiOutput("weights"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
+                  helpText("Uncheck to estimate model-based standard errors."),
+                  tags$b("Choose Model"),
+                  checkboxInput('twophase', 'Two-Phase Model', FALSE),
+                  br(),
+                  actionButton("fitModel", "Fit Model") 
+                  ),
+                  
+                  column(3, offset = 1,
+                  tags$b("Single-Phase Model Settings"),
                   checkboxInput('ties', 'Ties', TRUE),
+                  checkboxInput('wgts', 'Sampling weights used', FALSE),
+                  uiOutput("weights")
+              
+                  ),
                   
-                  checkboxInput('twophase', 'Two-Phase Sampling', TRUE),
-                  helpText("Uncheck if records were randomly sampled and disregard below options."),
-                  
+                  column(3, offset = 1,
+                  tags$b("Two-Phase Model Settings"),
+                  br(),
                   uiOutput("R"),
-                  uiOutput("p2probs"),
+                  uiOutput("p2probs")
+                  
                   #checkboxInput('calibration', 'Calibration', FALSE),
                   # helpText("Sometimes you need to create new calibration variables based on phase I variables.
                   #          The key is to find the variables highly correlated with phase II variable "),
@@ -96,9 +112,10 @@ ui <- dashboardPage(
                   #helpText("The inverse of the phase II selection probability for each subject. 
                   #         It is a number greater than or equal to 1."),
                   
-                  actionButton("fitModel", "Fit Model")  
-                ) # end mainPanel
-              ) # end fluidPage
+                  )
+                  
+                  ) # end fluidRow
+                ) # end fluidPage
       ), # end tabItem
       
       ## Fourth tab content
@@ -126,7 +143,7 @@ ui <- dashboardPage(
                 titlePanel("Plots"),
                 sidebarPanel(
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Bin width', NA, min = 2, max = 50, step=5, width='150px'),
+                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=5, width='150px'),
                   tags$b("Set histogram color using RGB inputs"),
                   sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
                   sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
