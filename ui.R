@@ -5,7 +5,7 @@ library(shinydashboard)
 ui <- dashboardPage(
   dashboardHeader(title = "Additive Hazards"),
   dashboardSidebar(
-   sidebarMenu(
+    sidebarMenu(
       menuItem(strong("Intro", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
       menuItem(strong("Data", style="font-size: 14pt"), tabName = "data", icon = icon("database")),
       menuItem(strong("Explore", style="font-size: 14pt"), tabName = "explore", icon = icon("search")),
@@ -71,12 +71,24 @@ ui <- dashboardPage(
                )
            ),
       
+      # Third tab content
       tabItem(tabName ="explore",
-              fluidPage(
+              # navbarPage(
+              #  title = 'DataTable Options',
+              #   tabPanel('Display length',
+              #            dataTableOutput('table1')
+              #   )
+              #  ) # end navbarPage
+              # ), # end tabItem
+              
+              navbarPage(
+                title = 'Data Visualization',
+                tabPanel(title='Histogram',
+                
                 sidebarPanel(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=5, width='150px'),
+                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=2, width='150px'),
                   tags$b("Set histogram color using RGB inputs"),
                   sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
                   sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
@@ -84,12 +96,30 @@ ui <- dashboardPage(
                   sliderInput('alpha', 'Opacity', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
                 ),
                 mainPanel(
-                  plotOutput("hist")#,
-                  #tags$b(paste("Figure 1. Histogram of", input$histvar, "variable."))
+                  plotOutput("hist")
                 )
-              )
+                ), # end first tabPanel
+              
+                tabPanel(title='Kaplan-Meier',
+                  sidebarPanel(
+                    uiOutput("surv0"),
+                    uiOutput("cen0"),
+                    checkboxInput('KMconfint', 'Show confidence intervals', FALSE),
+                    checkboxInput('KMticks', 'Show censoring times', FALSE),
+                    checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
+                    numericInput('KMheight', 'Zoom in', 0, min = 0, max = 1, step=0.1, width='150px'),
+                    checkboxInput('KMbygrp', 'Plot by group', FALSE),
+                    uiOutput("KMvar")
+                  ),
+                  mainPanel(
+                    plotOutput("KM")
+                  )
+              ) # end second tabPanel
+                
+            ) # end navbarPage      
       ),
-      # Third tab content 
+      
+      # Fourth tab content 
       tabItem(tabName ="model",
               fluidPage(
                 withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
@@ -115,7 +145,6 @@ ui <- dashboardPage(
                   checkboxInput('ties', 'Ties', TRUE),
                   checkboxInput('wgts', 'Sampling weights used', FALSE),
                   uiOutput("weights")
-              
                   ),
                   
                   column(3, offset = 1,
@@ -124,24 +153,23 @@ ui <- dashboardPage(
                   uiOutput("R"),
                   uiOutput("p2probs")
                   
-                  #checkboxInput('calibration', 'Calibration', FALSE),
+                  # checkboxInput('calibration', 'Calibration', FALSE),
                   # helpText("Sometimes you need to create new calibration variables based on phase I variables.
                   #          The key is to find the variables highly correlated with phase II variable "),
-                  #uiOutput("cal"),
-                  #helpText("The inverse of the phase II selection probability for each subject. 
-                  #         It is a number greater than or equal to 1."),
-                  
+                  # uiOutput("cal")
                   )
                   
                   ) # end fluidRow
                 ) # end fluidPage
       ), # end tabItem
       
-      ## Fourth tab content
+      ## Fifth tab content
       tabItem( tabName = "results",
         fluidPage(
           titlePanel("Inference on Coefficients"),
           mainPanel(
+            br(),
+            tags$b("Table 1. Parameter estimates with 95% confidence intervals."),
             tableOutput("regTab")
           ) 
 
@@ -156,7 +184,7 @@ ui <- dashboardPage(
       #  ) # end navbarPage
       # ), # end tabItem
       
-      ## Fifth tab content
+      ## Last tab content
       tabItem(tabName ="plots",
               fluidPage(
                 titlePanel("Plots")
