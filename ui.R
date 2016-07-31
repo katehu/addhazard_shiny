@@ -124,9 +124,7 @@ ui <- dashboardPage(
               fluidPage(
                 withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                 
-                #mainPanel(   
-                fluidRow(
-                  column(3,
+                sidebarPanel(   
                   tags$b("General Settings"),
                   br(),
                   uiOutput("surv"),
@@ -134,32 +132,56 @@ ui <- dashboardPage(
                   uiOutput("covariates"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
                   helpText("Uncheck to estimate model-based standard errors."),
-                  tags$b("Choose Model"),
-                  checkboxInput('twophase', 'Two-Phase Model', FALSE),
+                  radioButtons('modeltype', 'Choose Model',
+                              c('Cox Proportional Hazards'=0,
+                                'Single-phase Additive Hazards'=1,
+                                'Two-phase Additive Hazards'=2,
+                                'Calibrated Two-phase Additive Hazards'=3),
+                                1),
                   br(),
                   actionButton("fitModel", "Fit Model") 
                   ),
                   
-                  column(3, offset = 1,
-                  tags$b("Single-Phase Model Settings"),
-                  checkboxInput('ties', 'Ties', TRUE),
-                  checkboxInput('wgts', 'Sampling weights used', FALSE),
-                  uiOutput("weights")
-                  ),
+                  mainPanel(
+                  conditionalPanel("input.modeltype == 0",
+                    br(),                
+                    radioButtons('Coxties', 'Method for Ties',
+                                 c('Efron'='efron',
+                                   'Breslow'='breslow',
+                                   'Exact'='exact'),
+                                 'efron'),
+                    helpText("Insert blurb about handling ties.")
+                    ),
+                    
+                  conditionalPanel("input.modeltype == 1",
+                    br(),              
+                    tags$b("Single-Phase Model Settings"),
+                    checkboxInput('ties', 'Ties', TRUE),
+                    checkboxInput('wgts', 'Sampling weights used', FALSE),
+                    uiOutput("weights")
+                    ),
                   
-                  column(3, offset = 1,
-                  tags$b("Two-Phase Model Settings"),
-                  br(),
-                  uiOutput("R"),
-                  uiOutput("p2probs")
+                  conditionalPanel("input.modeltype == 2",
+                    br(),
+                    tags$b("Two-Phase Model Settings"),
+                    br(),
+                    uiOutput("R"),
+                    uiOutput("p2probs")
+                    ),
+                
+                  conditionalPanel("input.modeltype == 3",
+                                 br(),
+                                 tags$b("Calculator to come"),
+                                 br()
+                                 #uiOutput("cal"))
+                    )
+                  ) # end mainPanel
                   
                   # checkboxInput('calibration', 'Calibration', FALSE),
                   # helpText("Sometimes you need to create new calibration variables based on phase I variables.
                   #          The key is to find the variables highly correlated with phase II variable "),
                   # uiOutput("cal")
-                  )
                   
-                  ) # end fluidRow
                 ) # end fluidPage
       ), # end tabItem
       

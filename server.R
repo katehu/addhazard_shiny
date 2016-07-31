@@ -131,10 +131,13 @@ shinyServer(function(input, output) {
       dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
     
       ## Cox model
-      #fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), data=dat)
+      if (input$modeltype==0){
+          fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
+                        data=dat, robust=input$robust, ties=input$Coxties)
+      }
       
       ## additive hazards model
-      if (input$twophase==F){
+      if (input$modeltype==1){
          if (input$wgts==T){
           dat$w <- dat[, unlist(input$weights)]
           fit1 <-ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
@@ -144,7 +147,7 @@ shinyServer(function(input, output) {
                      data=dat, robust=input$robust, ties=input$ties)
          }
       ## additive hazards model with 2-phase sampling
-      } else {
+      } else if (input$modeltype==2) {
          dat$R <- dat[, unlist(input$R)]            
          dat$Pi <- dat[, unlist(input$p2probs)]
         
@@ -187,21 +190,24 @@ shinyServer(function(input, output) {
      if (input$KMbygrp==F){
         KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~ 1")), data=dat)
         if (input$KMcuminc==F){
-          plot(KMfit, main="Overall Kaplan-Meier Survival Curve", xlab="Time", 
+          plot(KMfit, main="Overall Kaplan-Meier Survival Curve", xlab="Time", ylab="Proportion without Event",
                conf.int=input$KMconfint, mark.time=input$KMticks, ylim=c(input$KMheight, 1))
         } else {
-          plot(KMfit, main="Overall Cumulative Inicidence Curve", xlab="Time", 
-               conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", ylim=c(0, 1-input$KMheight))  
+          plot(KMfit, main="Overall Cumulative Inicidence Curve",  
+               xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
+               ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))  
         }
        
      } else {
        KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~", input$KMvar)), data=dat)
        if (input$KMcuminc==F){
          plot(KMfit, main=paste("Kaplan-Meier Survival Curves by", paste(input$KMvar)), 
-              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, ylim=c(input$KMheight, 1))
+              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, 
+              ylab="Proportion without Event", ylim=c(input$KMheight, 1))
        } else {
          plot(KMfit, main=paste("Cumulative Incidence Curves by", paste(input$KMvar)), 
-              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", ylim=c(0, 1-input$KMheight))
+              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
+              ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))
        }
      }
    }) 
