@@ -124,27 +124,28 @@ ui <- dashboardPage(
               fluidPage(
                 withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                 
-                sidebarPanel(   
+                sidebarPanel( 
+                  radioButtons('modeltype', 'Choose Model',
+                               c('Cox Proportional Hazards'=0,
+                                 'Single-Phase Additive Hazards'=1,
+                                 'Two-Phase Additive Hazards'=2,
+                                 'Calibrated Two-Phase Additive Hazards'=3),
+                                 NA),
                   tags$b("General Settings"),
-                  br(),
                   uiOutput("surv"),
                   uiOutput("cen"),
                   uiOutput("covariates"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
                   helpText("Uncheck to estimate model-based standard errors."),
-                  radioButtons('modeltype', 'Choose Model',
-                              c('Cox Proportional Hazards'=0,
-                                'Single-phase Additive Hazards'=1,
-                                'Two-phase Additive Hazards'=2,
-                                'Calibrated Two-phase Additive Hazards'=3),
-                                1),
                   br(),
                   actionButton("fitModel", "Fit Model") 
                   ),
                   
                   mainPanel(
                   conditionalPanel("input.modeltype == 0",
-                    br(),                
+                    br(),    
+                    tags$b("Cox Proportional Hazards Model Settings"),
+                    br(), 
                     radioButtons('Coxties', 'Method for Ties',
                                  c('Efron'='efron',
                                    'Breslow'='breslow',
@@ -155,7 +156,7 @@ ui <- dashboardPage(
                     
                   conditionalPanel("input.modeltype == 1",
                     br(),              
-                    tags$b("Single-Phase Model Settings"),
+                    tags$b("Single-Phase Additive Hazards Model Settings"),
                     checkboxInput('ties', 'Ties', TRUE),
                     checkboxInput('wgts', 'Sampling weights used', FALSE),
                     uiOutput("weights")
@@ -163,7 +164,7 @@ ui <- dashboardPage(
                   
                   conditionalPanel("input.modeltype == 2",
                     br(),
-                    tags$b("Two-Phase Model Settings"),
+                    tags$b("Two-Phase Additive Hazards Model Settings"),
                     br(),
                     uiOutput("R"),
                     uiOutput("p2probs")

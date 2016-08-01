@@ -77,7 +77,7 @@ shinyServer(function(input, output) {
   })
   
   output$KMvar <- renderUI({
-    selectInput("KMvar", label = h4("Select Group Variable"), choices = names(data()),
+    selectInput("KMvar", label = h5("Select Group Variable"), choices = names(data()),
                 selected = NULL)
   })
   
