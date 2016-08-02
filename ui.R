@@ -167,21 +167,23 @@ ui <- dashboardPage(
                     tags$b("Two-Phase Additive Hazards Model Settings"),
                     br(),
                     uiOutput("R"),
-                    uiOutput("p2probs")
+                    uiOutput("p2p")
                     ),
                 
                   conditionalPanel("input.modeltype == 3",
-                                 br(),
-                                 tags$b("Calculator to come"),
-                                 br()
-                                 #uiOutput("cal"))
+                    br(),
+                    tags$b("Calibrated Two-Phase Additive Hazards Model Settings"),
+                    br(),
+                    uiOutput("Rcal"),
+                    uiOutput("p2pcal"),
+                    radioButtons('calib', 'Choose one',
+                                 c('All calibration variables available in data set'=0,
+                                   'Some calibration variables available in data set'=1,
+                                   'Need to calculate all calibration variables'=2),
+                                   NA),
+                    uiOutput("calvars")
                     )
                   ) # end mainPanel
-                  
-                  # checkboxInput('calibration', 'Calibration', FALSE),
-                  # helpText("Sometimes you need to create new calibration variables based on phase I variables.
-                  #          The key is to find the variables highly correlated with phase II variable "),
-                  # uiOutput("cal")
                   
                 ) # end fluidPage
       ), # end tabItem

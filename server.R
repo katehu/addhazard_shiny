@@ -112,14 +112,21 @@ shinyServer(function(input, output) {
     selectInput("weights", label = h5("Weights"), choices = names(data()))
   })
   
-  output$p2probs <- renderUI({
-    selectInput("p2probs", label = h5("Phase II Subsampling Probabilities"), choices = names(data()))
-                
+  output$p2p <- renderUI({
+    selectInput("p2p", label = h5("Phase II Subsampling Probabilities"), choices = names(data()))
   })
   
-  output$cal <- renderUI({
-    selectInput("cal", label = h5("Calibration Variables"), choices = names(data()), multiple = TRUE,
-                selected = NULL)
+  output$Rcal <- renderUI({
+    selectInput("Rcal", label = h5("Phase II Membership"), choices = names(data()))
+  })
+  
+  output$p2pcal <- renderUI({
+    selectInput("p2pcal", label = h5("Phase II Subsampling Probabilities"), choices = names(data()))
+    
+  })
+  
+  output$calvars <- renderUI({
+    selectizeInput("calvars", label = h5("Select calibration variable(s) from data set"), choices = names(data()), multiple = TRUE)
   })
 
   #-----------
@@ -149,12 +156,20 @@ shinyServer(function(input, output) {
       ## additive hazards model with 2-phase sampling
       } else if (input$modeltype==2) {
          dat$R <- dat[, unlist(input$R)]            
-         dat$Pi <- dat[, unlist(input$p2probs)]
-        
-         ## currently with no consideration of calibration variables
+         dat$Pi <- dat[, unlist(input$p2p)]
          fit1 <-ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
                        data=dat, robust=input$robust, R=R, Pi=Pi)
-    
+      
+      ## additive hazards model with 2-phase sampling and calibration
+      } else if (input$modeltype==3) {
+         dat$R <- dat[, unlist(input$Rcal)]            
+         dat$Pi <- dat[, unlist(input$p2pcal)]
+         
+         ## all calibration variables available
+         if (input$calib == 0){
+         fit1 <-ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+                      data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
+         }
       }
       
       output$regTab <- renderTable({
