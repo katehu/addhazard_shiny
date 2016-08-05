@@ -64,23 +64,19 @@ ui <- dashboardPage(
                               accept=c('text/csv',
                                        'text/comma-separated-values,text/plain',
                                        '.csv')),
-                    tags$hr()
+                    hr(),
+                    uiOutput("showvars")#,
+                    # numericInput('numdec', 'Number of decimal places', 2, min = 0, max = 10, step=1)
                   ),
-              
-                  mainPanel(dataTableOutput('contents'))
+                
+                  mainPanel(
+                    dataTableOutput('contents')
+                  )
                )
            ),
       
       # Third tab content
       tabItem(tabName ="explore",
-              # navbarPage(
-              #  title = 'DataTable Options',
-              #   tabPanel('Display length',
-              #            dataTableOutput('table1')
-              #   )
-              #  ) # end navbarPage
-              # ), # end tabItem
-              
               navbarPage(
                 title = 'Data Visualization',
                 tabPanel(title='Histogram',
@@ -195,20 +191,13 @@ ui <- dashboardPage(
           mainPanel(
             br(),
             tags$b("Table 1. Parameter estimates with 95% confidence intervals."),
-            tableOutput("regTab")
+            tableOutput("regTab"),
+            downloadButton('downloadTab', 'Download Table')
           ) 
 
          ) # endfluidPage
        ), # end tabItem
-      
-      # navbarPage(
-      #  title = 'DataTable Options',
-      #   tabPanel('Display length',
-      #            dataTableOutput('table1')
-      #   )
-      #  ) # end navbarPage
-      # ), # end tabItem
-      
+
       ## Last tab content
       tabItem(tabName ="plots",
               fluidPage(

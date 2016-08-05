@@ -62,15 +62,28 @@ shinyServer(function(input, output) {
         # data can be found.
         
         inFile <- input$file1
-        if (is.null(inFile))
-           return(NULL) else
-           return(data())
-      }, options = list(pageLength = 10)
+        dat <- data()
+        dat <- round(dat, 2) #input$numdec) # later change to user-defined 
+        
+        if (is.null(inFile)){
+          return(NULL)
+        } else {
+          return(dat[, c(unlist(input$showvars))])
+        }
+      }, options = list(pageLength = 10, orderClass = TRUE)
    )
   
   #------------
   # variables
   #------------
+   
+  output$showvars <- renderUI({  
+    selectizeInput('showvars', 
+                   'Displayed columns', 
+                    names(data()),
+                    selected = names(data()), multiple = TRUE)
+  })
+   
   output$histvar <- renderUI({
     selectInput("histvar", label = h4("Select Variable"), choices = names(data()),
                 selected = NULL)
@@ -135,40 +148,41 @@ shinyServer(function(input, output) {
   observeEvent(input$fitModel, {
   
       inFile <- input$file1
-      dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
+      dat <- data() 
     
       ## Cox model
-      if (input$modeltype==0){
+      if (input$modeltype == 0){
           fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
                         data=dat, robust=input$robust, ties=input$Coxties)
       }
       
       ## additive hazards model
-      if (input$modeltype==1){
-         if (input$wgts==T){
+      if (input$modeltype == 1){
+         if (input$wgts == T){
           dat$w <- dat[, unlist(input$weights)]
-          fit1 <-ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+          fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
                     data=dat, robust=input$robust, ties=input$ties, weights=w)
          } else {
-           fit1 <-ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+           fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
                      data=dat, robust=input$robust, ties=input$ties)
          }
+        
       ## additive hazards model with 2-phase sampling
-      } else if (input$modeltype==2) {
+      } else if (input$modeltype == 2) {
          dat$R <- dat[, unlist(input$R)]            
          dat$Pi <- dat[, unlist(input$p2p)]
-         fit1 <-ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
-                       data=dat, robust=input$robust, R=R, Pi=Pi)
+         fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+                        data=dat, robust=input$robust, R=R, Pi=Pi)
       
       ## additive hazards model with 2-phase sampling and calibration
-      } else if (input$modeltype==3) {
+      } else if (input$modeltype == 3) {
          dat$R <- dat[, unlist(input$Rcal)]            
          dat$Pi <- dat[, unlist(input$p2pcal)]
          
          ## all calibration variables available
          if (input$calib == 0){
-         fit1 <-ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
-                      data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
+         fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+                        data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
          }
       }
       
@@ -180,12 +194,51 @@ shinyServer(function(input, output) {
   }) # end observeEvent
   
   #-----------
+  # downloads
+  #-----------
+  
+#   inputRegtab <- reactive({
+#     
+#   inFile <- input$file1
+#   if (is.null(inFile)) return()
+#   dat <- data()
+#   
+#   }) # end reactive
+    
+#     f <- function(a,b,c, ...){
+#       
+#     }
+#   
+#   mydata <- reactive(f(input$seed,
+#                        input$ncases,
+#                        input$branches))
+  
+#   fitModel <- renderPrint({
+#       dat <- inputRegtab
+#       fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
+#                  data=dat, robust=input$robust, ties=input$Coxties)
+# 
+#       summary(fit1)$coef
+#   })
+  
+#   output$downloadTab <- downloadHandler(
+#     #filename = function() {
+#     #  paste('Model_estimates_', Sys.Date(), '.csv', sep='')
+#     #},
+#     filename = "Model_estimates.csv",
+#     content = function(file) {
+#       write.csv(inputRegtab(), file, row.names = F)  # mydata() 
+#       # https://talesofr.wordpress.com/tag/shiny/
+#     }
+#   )
+  
+  #-----------
   # figures
   #-----------
    output$hist <- renderPlot({
       inFile <- input$file1
-      dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
-    
+      dat <- data() 
+      
       if (is.na(input$nbreaks)){
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
           probability = input$histprob,
@@ -200,7 +253,7 @@ shinyServer(function(input, output) {
    
    output$KM <- renderPlot({
      inFile <- input$file1
-     dat <- read.csv(inFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
+     dat <- data() 
      
      if (input$KMbygrp==F){
         KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~ 1")), data=dat)
@@ -225,6 +278,6 @@ shinyServer(function(input, output) {
               ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))
        }
      }
-   }) 
+   })
   
 }) ## end document
