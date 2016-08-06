@@ -108,7 +108,7 @@ ui <- dashboardPage(
                   sidebarPanel(
                     uiOutput("surv0"),
                     uiOutput("cen0"),
-                    helpText("Can be omitted if all subjects have an event."),
+                    helpText("Can leave blank if all subjects have an event."),
                     checkboxInput('KMconfint', 'Show confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
                     checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
@@ -156,9 +156,12 @@ ui <- dashboardPage(
                                    'Breslow'='breslow',
                                    'Exact'='exact'),
                                  'efron'),
-                    helpText("Insert blurb about handling ties.")
-                    ),
-                    
+                    br(),
+                    helpText("The Efron approximation is more accurate when there are many tied event times. 
+                              All three methods are equivalent if there are no ties, and they are statistically 
+                              indistinguishable if the number of ties is small.")
+                  ),
+                                         
                   conditionalPanel("input.modeltype == 1",
                     br(),              
                     tags$b("Single-Phase Additive Hazards Model Settings"),
@@ -213,8 +216,21 @@ ui <- dashboardPage(
       ## Last tab content
       tabItem(tabName ="plots",
               fluidPage(
-                titlePanel("Plots")
-              
+                titlePanel("Predicted Hazards"),
+                sidebarPanel(
+                  tags$b("Enter covariate value(s) for hazard prediction"),
+                  br(),
+                  numericInput('var1', 'Covariate 1', NA, min = NA, max = NA, step=1),
+                  numericInput('var2', 'Covariate 2', NA, min = NA, max = NA, step=1),
+                  numericInput('var3', 'Covariate 3', NA, min = NA, max = NA, step=1),
+                  numericInput('var4', 'Covariate 4', NA, min = NA, max = NA, step=1),
+                  numericInput('var5', 'Covariate 5', NA, min = NA, max = NA, step=1),
+                  br(),
+                  numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1)
+                  ),
+                mainPanel(
+                  plotOutput("plotPredHaz")
+                )
         
               ) # end fluidPage
       ) # end tabItem

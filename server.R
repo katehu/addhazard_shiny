@@ -203,6 +203,24 @@ shinyServer(function(input, output) {
         summary(fit1)$coef
       }, digits = 4)
       
+      output$plotPredHaz <- renderPlot({
+        newdata <- data.frame(t(c(input$var1, input$var2, input$var3, input$var4, input$var5)))
+        ncov <- length(unlist(input$covariates))
+        newdata <- newdata[, 1:ncov]
+        names(newdata) <- unlist(input$covariates)
+        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)]), na.rm=T)
+        
+        vartab <- cbind(names(newdata), c(newdata[1,]))
+        vars <- paste(vartab[,1], "=", vartab[,2], sep='')
+        vars <- paste(vars, collapse = ", ")
+        plot(predtab[,1], predtab[,2], type='l', xlab="Time", ylab="Predicted Hazard Rate",
+             main=paste("Predicted Hazards Over Time \n", vars, sep=''))
+        
+        if (!is.na(input$haztime)){
+          abline(v=input$haztime, col="red", lty=3)
+        }
+      })
+      
   }) # end observeEvent
   
   #-----------
