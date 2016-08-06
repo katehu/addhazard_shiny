@@ -85,32 +85,36 @@ shinyServer(function(input, output) {
   })
    
   output$histvar <- renderUI({
-    selectInput("histvar", label = h4("Select Variable"), choices = names(data()),
-                selected = NULL)
+    selectInput("histvar", label = h4("Select Variable"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$KMvar <- renderUI({
-    selectInput("KMvar", label = h5("Select Group Variable"), choices = names(data()),
-                selected = NULL)
+    selectInput("KMvar", label = h5("Select Group Variable"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$surv0 <- renderUI({
-    selectInput("surv0", label = h5("Survival Outcomes"), choices = names(data()))
+    selectInput("surv0", label = h5("Survival Outcomes"), choices = c('',names(data())),
+                selected = '')
   })
   
   
   output$cen0 <- renderUI({
-    selectInput("cen0", label = h5("Censoring Indicator"), choices = names(data()))
+    selectInput("cen0", label = h5("Censoring Indicator"), choices = c('', names(data())),
+                selected = '')
   })
   
  
   output$surv <- renderUI({
-    selectInput("surv", label = h5("Survival Outcomes"), choices = names(data()))
+    selectInput("surv", label = h5("Survival Outcomes"), choices = c('', names(data())),
+                selected = '')
   })
   
   
   output$cen <- renderUI({
-    selectInput("cen", label = h5("Censoring Indicator"), choices = names(data()))
+    selectInput("cen", label = h5("Censoring Indicator"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$covariates <- renderUI({
@@ -118,23 +122,28 @@ shinyServer(function(input, output) {
   })
   
   output$R <- renderUI({
-    selectInput("R", label = h5("Phase II Membership"), choices = names(data()))
+    selectInput("R", label = h5("Phase II Membership"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$weights<- renderUI({
-    selectInput("weights", label = h5("Weights"), choices = names(data()))
+    selectInput("weights", label = h5("Weights"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$p2p <- renderUI({
-    selectInput("p2p", label = h5("Phase II Subsampling Probabilities"), choices = names(data()))
+    selectInput("p2p", label = h5("Phase II Subsampling Probabilities"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$Rcal <- renderUI({
-    selectInput("Rcal", label = h5("Phase II Membership"), choices = names(data()))
+    selectInput("Rcal", label = h5("Phase II Membership"), choices = c('', names(data())),
+                selected = '')
   })
   
   output$p2pcal <- renderUI({
-    selectInput("p2pcal", label = h5("Phase II Subsampling Probabilities"), choices = names(data()))
+    selectInput("p2pcal", label = h5("Phase II Subsampling Probabilities"), choices = c('', names(data())),
+                selected = '')
     
   })
   

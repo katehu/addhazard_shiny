@@ -108,12 +108,13 @@ ui <- dashboardPage(
                   sidebarPanel(
                     uiOutput("surv0"),
                     uiOutput("cen0"),
+                    helpText("Can be omitted if all subjects have an event."),
                     checkboxInput('KMconfint', 'Show confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
                     checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
                     numericInput('KMheight', 'Zoom in', 0, min = 0, max = 1, step=0.1, width='150px'),
-                    checkboxInput('KMbygrp', 'Plot by group', FALSE),
-                    uiOutput("KMvar")
+                    uiOutput("KMvar"),
+                    checkboxInput('KMbygrp', 'Plot by group', FALSE)
                   ),
                   mainPanel(
                     plotOutput("KM")
