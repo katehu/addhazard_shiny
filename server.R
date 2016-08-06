@@ -147,9 +147,13 @@ shinyServer(function(input, output) {
   #-----------
   observeEvent(input$fitModel, {
   
-      inFile <- input$file1
-      dat <- data() 
+    dat <- data() 
     
+    if (!is.null(input$modeltype) & !is.null(input$covariates) &
+        input$surv != input$cen & length(table(input$cen) <= 2) & !is.na(input$cen) &
+        is.numeric(input$surv) & (is.numeric(input$cen) | is.logical(input$cen)) &
+      !(input$surv %in% input$covariates) & !(input$cen %in% input$covariates)){
+        
       ## Cox model
       if (input$modeltype == 0){
           fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
@@ -185,7 +189,7 @@ shinyServer(function(input, output) {
                         data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
          }
       }
-      
+    } 
       output$regTab <- renderTable({
           # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
             summary(fit1)$coef
@@ -196,14 +200,6 @@ shinyServer(function(input, output) {
   #-----------
   # downloads
   #-----------
-  
-#   inputRegtab <- reactive({
-#     
-#   inFile <- input$file1
-#   if (is.null(inFile)) return()
-#   dat <- data()
-#   
-#   }) # end reactive
     
 #     f <- function(a,b,c, ...){
 #       
@@ -213,24 +209,28 @@ shinyServer(function(input, output) {
 #                        input$ncases,
 #                        input$branches))
   
-#   fitModel <- renderPrint({
-#       dat <- inputRegtab
-#       fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
-#                  data=dat, robust=input$robust, ties=input$Coxties)
-# 
-#       summary(fit1)$coef
-#   })
+  # printSummary <- renderPrint({
+  #    tab <- fitModel()
+  # })
   
-#   output$downloadTab <- downloadHandler(
-#     #filename = function() {
-#     #  paste('Model_estimates_', Sys.Date(), '.csv', sep='')
-#     #},
-#     filename = "Model_estimates.csv",
-#     content = function(file) {
-#       write.csv(inputRegtab(), file, row.names = F)  # mydata() 
-#       # https://talesofr.wordpress.com/tag/shiny/
-#     }
-#   )
+  printSummary <- reactive({
+    # Fetch the appropriate output table, depending on the value
+    # of input$fitModel
+    tab <- input$fitModel
+    data.frame(tab)
+    #data()
+  })
+  
+  output$downloadTab <- downloadHandler(
+    #filename = function() {
+    #  paste('Model_estimates_', Sys.Date(), '.csv', sep='')
+    #},
+    filename = function() {"Model_estimates.csv"},
+    content = function(filename) {
+      write.csv(printSummary(), filename, row.names = F)  # mydata()
+      # https://talesofr.wordpress.com/tag/shiny/
+    }
+  )
   
   #-----------
   # figures
