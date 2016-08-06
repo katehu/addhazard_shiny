@@ -22,18 +22,26 @@ ui <- dashboardPage(
                   titlePanel("Introduction"),
                   
                   p("This web app is a tool for obtaining parameter estimates from single- and 
-                    two-phase additive hazards models and visualizing predicted individual-specific hazards.
+                    two-phase additive hazards models (Lin, 1997) and visualizing predicted individual-specific hazards.
                     For fitting two-phase models with auxiliary information, it also supports in-app 
-                    calculation of calibration variables.", 
+                    calculation of calibration variables, which are observed for all subjects and are most
+                    useful if correlated with the characteristics additionally ascertained in the
+                    smaller Phase II sample.", 
                     style = "font-family: 'Calibri'; font-size: 14pt"),
                   
-                  p("Currently supported input file types include comma separated values, Excel spreadsheets,
+                  p("Supported input file types include comma separated values, Excel spreadsheets,
                     delimited text files, as well as SAS, Stata (up to Version 12), and SPSS data sets. 
-                    Estimates with model-based or robust standard errors and figures may be downloaded for further manipulation.",
+                    Tools for visualizing distributions and time-to-event trajectories are available to inform 
+                    whether hazards are additive or multiplicative, in which case the traditional Cox proportional 
+                    hazards model (Cox, 1972) would be more appropriate. Estimates with model-based or robust 
+                    standard errors and hazard plots may be downloaded for further manipulation.",
                     style = "font-family: 'Calibri'; font-size: 14pt"),
   
-                  p("Documentation for the associated R package may be found", 
-                  a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"), 
+                  p("Documentation for the associated 'addhazard' R package may be found", 
+                  a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"),
+                    "This web app was created with the 'shiny' and 'shinydashboard' R packages and includes
+                    methodologies from 'survival' and the following for data uploads: 'memisc', 'xlsx', 
+                   'foreign', and 'sas7bdat'.", 
                     style = "font-family: 'Calibri'; font-size: 14pt")
                 )),
 
