@@ -150,8 +150,7 @@ shinyServer(function(input, output) {
     dat <- data() 
     
     if (!is.null(input$modeltype) & !is.null(input$covariates) &
-        input$surv != input$cen & length(table(input$cen) <= 2) & !is.na(input$cen) &
-        is.numeric(input$surv) & (is.numeric(input$cen) | is.logical(input$cen)) &
+        input$surv != input$cen & is.numeric(dat[, unlist(input$surv)]) & 
       !(input$surv %in% input$covariates) & !(input$cen %in% input$covariates)){
         
       ## Cox model
@@ -191,9 +190,9 @@ shinyServer(function(input, output) {
       }
     } 
       output$regTab <- renderTable({
-          # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
-            summary(fit1)$coef
-      })
+        # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
+        summary(fit1)$coef
+      }, digits = 4)
       
   }) # end observeEvent
   
@@ -268,14 +267,19 @@ shinyServer(function(input, output) {
        
      } else {
        KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~", input$KMvar)), data=dat)
+       ngroups <- length(table(dat[, unlist(input$KMvar)]))
+       
        if (input$KMcuminc==F){
          plot(KMfit, main=paste("Kaplan-Meier Survival Curves by", paste(input$KMvar)), 
               xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, 
-              ylab="Proportion without Event", ylim=c(input$KMheight, 1))
+              ylab="Proportion without Event", ylim=c(input$KMheight, 1), col=1:ngroups)
+         legend("bottomleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
        } else {
          plot(KMfit, main=paste("Cumulative Incidence Curves by", paste(input$KMvar)), 
               xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
-              ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))
+              ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight), col=1:ngroups)
+         legend("topleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
+         
        }
      }
    })

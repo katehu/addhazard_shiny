@@ -189,9 +189,12 @@ ui <- dashboardPage(
         fluidPage(
           titlePanel("Inference on Coefficients"),
           mainPanel(
+            #br(),
+            #numericInput('numdec', 'Number of decimal places to show', 2, min = 0, max = 10, step=1),
             br(),
             tags$b("Table 1. Parameter estimates with 95% confidence intervals."),
             tableOutput("regTab"),
+            br(),
             downloadButton('downloadTab', 'Download Table')
           ) 
 
