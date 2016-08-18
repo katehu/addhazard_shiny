@@ -78,10 +78,16 @@ shinyServer(function(input, output) {
   #------------
    
   output$showvars <- renderUI({  
+    inFile <- input$file1
+    
+    if (!is.null(inFile)){
     selectizeInput('showvars', 
                    'Displayed columns', 
                     names(data()),
                     selected = names(data()), multiple = TRUE)
+    } else {
+      return()
+    }
   })
    
   output$histvar <- renderUI({
@@ -295,12 +301,15 @@ shinyServer(function(input, output) {
         if (is.na(input$nbreaks)){
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
           probability = input$histprob,
-          col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+          col=rgb(0, 0, 0.5, alpha=0.3))
+         # col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+         
         
         } else {
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
            probability = input$histprob, breaks = input$nbreaks,
-           col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+           col=rgb(0, 0, 0.5, alpha=0.3))
+           # col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
         }
       } else {
         return(NULL)

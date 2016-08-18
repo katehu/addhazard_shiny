@@ -92,12 +92,12 @@ ui <- dashboardPage(
                 sidebarPanel(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=2, width='150px'),
-                  tags$b("Set histogram color using RGB inputs"),
-                  sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  sliderInput('alpha', 'Opacity', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
+                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=2, width='150px')
+                  # tags$b("Set histogram color using RGB inputs"),
+                  # sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  # sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  # sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
+                  # sliderInput('alpha', 'Opacity', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
                 ),
                 mainPanel(
                   plotOutput("hist")
