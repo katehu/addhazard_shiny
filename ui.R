@@ -40,9 +40,9 @@ ui <- dashboardPage(
                   p("Documentation for the associated 'addhazard' R package may be found", 
                   a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"),
                     "This web app was created with",
-                  a("R", href="www.r-project.org"), ",", 
-                  a("Shiny", href="shiny.rstudio.com"), ", and",
-                  a("shinydashboard", href="rstudio.github.io/shinydashboard"), 
+                  a("R", href="http://www.r-project.org"), ",", 
+                  a("Shiny", href="http://shiny.rstudio.com"), ", and",
+                  a("shinydashboard", href="http://rstudio.github.io/shinydashboard"), 
                     "and includes methodologies from version 2.38 of the",
                   a("survival", href="http://CRAN.R-project.org/package=survival"), 
                     "R package (Therneau, 2015) and the following 
