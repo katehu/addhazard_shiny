@@ -62,12 +62,12 @@ shinyServer(function(input, output) {
         # data can be found.
         
         inFile <- input$file1
-        dat <- data()
-        dat <- round(dat, 2) #input$numdec) # later change to user-defined 
-        
+       
         if (is.null(inFile)){
           return(NULL)
         } else {
+          dat <- data()
+          dat <- round(dat, 2) #input$numdec) # later change to user-defined 
           return(dat[, c(unlist(input$showvars))])
         }
       }, options = list(pageLength = 10, orderClass = TRUE)
@@ -208,7 +208,8 @@ shinyServer(function(input, output) {
         ncov <- length(unlist(input$covariates))
         newdata <- newdata[, 1:ncov]
         names(newdata) <- unlist(input$covariates)
-        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)]), na.rm=T)
+        #predtab <- predict(fit1, newdata, newtime = seq(0, max(dat[, unlist(input$surv)], na.rm=T), by=0.01))
+        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
         
         vartab <- cbind(names(newdata), c(newdata[1,]))
         vars <- paste(vartab[,1], "=", vartab[,2], sep='')
@@ -218,6 +219,7 @@ shinyServer(function(input, output) {
         
         if (!is.na(input$haztime)){
           abline(v=input$haztime, col="red", lty=3)
+          #points(input$haztime, predtab[which.min(abs(predtab[,1] - input$haztime)), 2])
         }
       })
       
@@ -265,15 +267,19 @@ shinyServer(function(input, output) {
       inFile <- input$file1
       dat <- data() 
       
-      if (is.na(input$nbreaks)){
+      if (input$histvar != ""){
+        if (is.na(input$nbreaks)){
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
           probability = input$histprob,
           col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
         
-      } else {
+        } else {
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
            probability = input$histprob, breaks = input$nbreaks,
            col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+        }
+      } else {
+        return(NULL)
       }
    }) 
    
@@ -281,33 +287,37 @@ shinyServer(function(input, output) {
      inFile <- input$file1
      dat <- data() 
      
-     if (input$KMbygrp==F){
-        KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~ 1")), data=dat)
-        if (input$KMcuminc==F){
-          plot(KMfit, main="Overall Kaplan-Meier Survival Curve", xlab="Time", ylab="Proportion without Event",
-               conf.int=input$KMconfint, mark.time=input$KMticks, ylim=c(input$KMheight, 1))
+     if (input$surv0 != ""){
+        if (input$KMbygrp==F){
+          KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~ 1")), data=dat)
+          if (input$KMcuminc==F){
+            plot(KMfit, main="Overall Kaplan-Meier Survival Curve", xlab="Time", ylab="Proportion without Event",
+                 conf.int=input$KMconfint, mark.time=input$KMticks, ylim=c(input$KMheight, 1))
+          } else {
+            plot(KMfit, main="Overall Cumulative Inicidence Curve",  
+                 xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
+                 ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))  
+          }
+       
         } else {
-          plot(KMfit, main="Overall Cumulative Inicidence Curve",  
-               xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
-               ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight))  
-        }
+          KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~", input$KMvar)), data=dat)
+          ngroups <- length(table(dat[, unlist(input$KMvar)]))
        
-     } else {
-       KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~", input$KMvar)), data=dat)
-       ngroups <- length(table(dat[, unlist(input$KMvar)]))
-       
-       if (input$KMcuminc==F){
-         plot(KMfit, main=paste("Kaplan-Meier Survival Curves by", paste(input$KMvar)), 
-              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, 
-              ylab="Proportion without Event", ylim=c(input$KMheight, 1), col=1:ngroups)
-         legend("bottomleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
-       } else {
-         plot(KMfit, main=paste("Cumulative Incidence Curves by", paste(input$KMvar)), 
-              xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
-              ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight), col=1:ngroups)
-         legend("topleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
+          if (input$KMcuminc==F){
+            plot(KMfit, main=paste("Kaplan-Meier Survival Curves by", paste(input$KMvar)), 
+                 xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, 
+                 ylab="Proportion without Event", ylim=c(input$KMheight, 1), col=1:ngroups)
+            legend("bottomleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
+          } else {
+            plot(KMfit, main=paste("Cumulative Incidence Curves by", paste(input$KMvar)), 
+                 xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, fun="event", 
+                 ylab="Cumulative Incidence", ylim=c(0, 1-input$KMheight), col=1:ngroups)
+                 legend("topleft", lty=1, paste(input$KMvar, "=", names(table(dat[, unlist(input$KMvar)])), sep=''), col=1:ngroups, bty='n')
          
-       }
+          }
+        }
+     } else {
+       return(NULL)
      }
    })
   

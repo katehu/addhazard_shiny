@@ -106,9 +106,9 @@ ui <- dashboardPage(
               
                 tabPanel(title='Kaplan-Meier',
                   sidebarPanel(
-                    uiOutput("surv0"),
                     uiOutput("cen0"),
-                    helpText("Can leave blank if all subjects have an event."),
+                    # helpText("Can leave blank if all subjects have an event."),
+                    uiOutput("surv0"),
                     checkboxInput('KMconfint', 'Show confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
                     checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
@@ -137,8 +137,8 @@ ui <- dashboardPage(
                                  'Calibrated Two-Phase Additive Hazards'=3),
                                  NA),
                   tags$b("General Settings"),
-                  uiOutput("surv"),
                   uiOutput("cen"),
+                  uiOutput("surv"),
                   uiOutput("covariates"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
                   helpText("Uncheck to estimate model-based standard errors."),
