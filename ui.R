@@ -39,9 +39,17 @@ ui <- dashboardPage(
   
                   p("Documentation for the associated 'addhazard' R package may be found", 
                   a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"),
-                    "This web app was created with the 'shiny' and 'shinydashboard' R packages and includes
-                    methodologies from 'survival' and the following for data uploads: 'memisc', 'xlsx', 
-                   'foreign', and 'sas7bdat'.", 
+                    "This web app was created with",
+                  a("R", href="www.r-project.org"), ",", 
+                  a("Shiny", href="shiny.rstudio.com"), ", and",
+                  a("shinydashboard", href="rstudio.github.io/shinydashboard"), 
+                    "and includes methodologies from version 2.38 of the",
+                  a("survival", href="http://CRAN.R-project.org/package=survival"), 
+                    "R package (Therneau, 2015) and the following 
+                    for data uploads:",
+                  a("memisc", href="http://CRAN.R-project.org/package=memisc"), ",",
+                  a("xlsx", href="http://CRAN.R-project.org/package=xlsx"), ", and",
+                  a("sas7bdat", href="http://CRAN.R-project.org/package=sas7bdat"), ".", 
                     style = "font-family: 'Calibri'; font-size: 14pt")
                 )),
 

@@ -9,7 +9,7 @@ sourceDir <- function(path, trace = TRUE, ...) {
 }
 # sourceDir("/Users/kate.hu/Documents/ah/R",trace=TRUE)
 library(shiny)
-library(xtable)
+# library(xtable)
 library(addhazard)
 library(survival)
 
