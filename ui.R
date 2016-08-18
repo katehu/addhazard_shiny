@@ -109,7 +109,7 @@ ui <- dashboardPage(
                     uiOutput("cen0"),
                     # helpText("Can leave blank if all subjects have an event."),
                     uiOutput("surv0"),
-                    checkboxInput('KMconfint', 'Show confidence intervals', FALSE),
+                    checkboxInput('KMconfint', 'Show 95% confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
                     checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
                     numericInput('KMheight', 'Zoom in', 0, min = 0, max = 1, step=0.1, width='150px'),
@@ -220,12 +220,9 @@ ui <- dashboardPage(
                 sidebarPanel(
                   tags$b("Enter covariate value(s) for hazard prediction"),
                   br(),
-                  numericInput('var1', 'Covariate 1', NA, min = NA, max = NA, step=1),
-                  numericInput('var2', 'Covariate 2', NA, min = NA, max = NA, step=1),
-                  numericInput('var3', 'Covariate 3', NA, min = NA, max = NA, step=1),
-                  numericInput('var4', 'Covariate 4', NA, min = NA, max = NA, step=1),
-                  numericInput('var5', 'Covariate 5', NA, min = NA, max = NA, step=1),
                   br(),
+                  uiOutput("modelCovariates"),
+                  checkboxInput('predHazCI', 'Show 95% confidence intervals', FALSE),
                   numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1)
                   ),
                 mainPanel(

@@ -203,19 +203,43 @@ shinyServer(function(input, output) {
         summary(fit1)$coef
       }, digits = 4)
       
-      output$plotPredHaz <- renderPlot({
-        newdata <- data.frame(t(c(input$var1, input$var2, input$var3, input$var4, input$var5)))
+      output$modelCovariates <- renderUI({
         ncov <- length(unlist(input$covariates))
-        newdata <- newdata[, 1:ncov]
+        # define variable ranges
+        lapply(1:ncov, function(i){
+          list(tags$b(input$covariates[i]), 
+               numericInput(paste0("cov", i), label=NA, value=NA))
+          }
+        )
+      })
+      
+      output$plotPredHaz <- renderPlot({
+        ncov <- length(unlist(input$covariates))
+        
+        varlist <- c(input$cov1, input$cov2, input$cov3, input$cov4, input$cov5,
+                     input$cov6, input$cov7, input$cov8, input$cov9, input$cov10)[1:ncov]
+        newdata <- data.frame(t(varlist))
         names(newdata) <- unlist(input$covariates)
+       
         #predtab <- predict(fit1, newdata, newtime = seq(0, max(dat[, unlist(input$surv)], na.rm=T), by=0.01))
         predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
+        predtab$CI_l <- with(predtab, L - qnorm(0.975)*L.se)
+        predtab$CI_u <- with(predtab, L + qnorm(0.975)*L.se)
         
         vartab <- cbind(names(newdata), c(newdata[1,]))
         vars <- paste(vartab[,1], "=", vartab[,2], sep='')
         vars <- paste(vars, collapse = ", ")
-        plot(predtab[,1], predtab[,2], type='l', xlab="Time", ylab="Predicted Hazard Rate",
-             main=paste("Predicted Hazards Over Time \n", vars, sep=''))
+        
+        maxY <- ifelse(input$predHazCI == F, max(predtab$L, na.rm=T), max(predtab$CI_u, na.rm=T))*1.1
+        
+        plot(predtab$time, predtab$L, type='l', xlab="Time", ylab="Predicted Hazard Rate",
+             main=paste("Predicted Hazards Over Time \n", vars, sep=''),
+             ylim=c(0, maxY))
+        
+        if (input$predHazCI == T){
+          lines(predtab[,1], predtab[,"CI_l"], type='l', lty=2)
+          lines(predtab[,1], predtab[,"CI_u"], type='l', lty=2)
+        }
         
         if (!is.na(input$haztime)){
           abline(v=input$haztime, col="red", lty=3)
