@@ -225,6 +225,7 @@ ui <- dashboardPage(
       tabItem(tabName ="plots",
               fluidPage(
                 titlePanel("Predicted Hazards"),
+                helpText("This feature is only available for additive hazard models."),
                 sidebarPanel(
                   tags$b("Enter covariate value(s) for hazard prediction"),
                   br(),

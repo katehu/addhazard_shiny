@@ -226,15 +226,21 @@ shinyServer(function(input, output) {
                      input$cov6, input$cov7, input$cov8, input$cov9, input$cov10)[1:ncov]
         newdata <- data.frame(t(varlist))
         names(newdata) <- unlist(input$covariates)
-       
-        #predtab <- predict(fit1, newdata, newtime = seq(0, max(dat[, unlist(input$surv)], na.rm=T), by=0.01))
-        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
-        predtab$CI_l <- with(predtab, L - qnorm(0.975)*L.se)
-        predtab$CI_u <- with(predtab, L + qnorm(0.975)*L.se)
         
         vartab <- cbind(names(newdata), c(newdata[1,]))
         vars <- paste(vartab[,1], "=", vartab[,2], sep='')
         vars <- paste(vars, collapse = ", ")
+       
+        #predtab <- predict(fit1, newdata, newtime = seq(0, max(dat[, unlist(input$surv)], na.rm=T), by=0.01))
+        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
+        if (!("time" %in% names(predtab))){
+          predtab$time <- 1:max(dat[, unlist(input$surv)])
+        }
+        
+        if (input$modeltype>0){
+          
+        predtab$CI_l <- with(predtab, L - qnorm(0.975)*L.se)
+        predtab$CI_u <- with(predtab, L + qnorm(0.975)*L.se)
         
         maxY <- ifelse(input$predHazCI == F, max(predtab$L, na.rm=T), max(predtab$CI_u, na.rm=T))*1.1
         
@@ -243,13 +249,16 @@ shinyServer(function(input, output) {
              ylim=c(0, maxY))
         
         if (input$predHazCI == T){
-          lines(predtab[,1], predtab[,"CI_l"], type='l', lty=2)
-          lines(predtab[,1], predtab[,"CI_u"], type='l', lty=2)
+          lines(predtab[,"time"], predtab[,"CI_l"], type='l', lty=2)
+          lines(predtab[,"time"], predtab[,"CI_u"], type='l', lty=2)
         }
         
         if (!is.na(input$haztime)){
           abline(v=input$haztime, col="red", lty=3)
           #points(input$haztime, predtab[which.min(abs(predtab[,1] - input$haztime)), 2])
+        }
+        } else {
+          return(NULL)
         }
       })
       
