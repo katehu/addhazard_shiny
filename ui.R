@@ -163,7 +163,7 @@ ui <- dashboardPage(
                                  c('Efron'='efron',
                                    'Breslow'='breslow',
                                    'Exact'='exact'),
-                                 'efron'),
+                                   'efron'),
                     br(),
                     helpText("The Efron approximation is more accurate when there are many tied event times. 
                               All three methods are equivalent if there are no ties, and they are statistically 
@@ -211,6 +211,7 @@ ui <- dashboardPage(
           mainPanel(
             #br(),
             #numericInput('numdec', 'Number of decimal places to show', 2, min = 0, max = 10, step=1),
+            textOutput("modelEq"),
             br(),
             tags$b("Table 1. Parameter estimates with 95% confidence intervals."),
             tableOutput("regTab"),

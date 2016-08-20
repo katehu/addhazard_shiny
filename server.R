@@ -167,15 +167,14 @@ shinyServer(function(input, output) {
     if (!is.null(input$modeltype) & !is.null(input$covariates) &
         input$surv != input$cen & is.numeric(dat[, unlist(input$surv)]) & 
       !(input$surv %in% input$covariates) & !(input$cen %in% input$covariates)){
-        
+      
       ## Cox model
       if (input$modeltype == 0){
           fit1 <- coxph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))), 
                         data=dat, robust=input$robust, ties=input$Coxties)
-      }
       
       ## additive hazards model
-      if (input$modeltype == 1){
+      } else if (input$modeltype == 1){
          if (input$wgts == T){
           dat$w <- dat[, unlist(input$weights)]
           fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
@@ -203,7 +202,23 @@ shinyServer(function(input, output) {
                         data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
          }
       }
+      
+      terms <- c()
+      for (i in 1:length(unlist(input$covariates))){
+        terms[i] <- paste0(" + b", i, "*", unlist(input$covariates[i]))
+      }
     } 
+    
+     # output$modelEq <- renderPrint({
+    output$modelEq <- renderText({
+        if (input$modeltype > 0){
+          out <- paste(c("lambda(t) = lambda0(t) + b0", terms), collapse="")
+        } else {
+          out <- paste(c("lambda(t) = lambda0(t)*exp(b0", terms, ")"), collapse="")
+        }
+        print(out)
+      })
+      
       output$regTab <- renderTable({
         # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
         summary(fit1)$coef
@@ -220,6 +235,8 @@ shinyServer(function(input, output) {
       })
       
       output$plotPredHaz <- renderPlot({
+        if (input$modeltype>0){
+          
         ncov <- length(unlist(input$covariates))
         
         varlist <- c(input$cov1, input$cov2, input$cov3, input$cov4, input$cov5,
@@ -231,14 +248,12 @@ shinyServer(function(input, output) {
         vars <- paste(vartab[,1], "=", vartab[,2], sep='')
         vars <- paste(vars, collapse = ", ")
        
-        #predtab <- predict(fit1, newdata, newtime = seq(0, max(dat[, unlist(input$surv)], na.rm=T), by=0.01))
+        #predtab <- predict(fit1, newdata, newtime = seq(0.1, 20, by=0.1))
         predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
         if (!("time" %in% names(predtab))){
-          predtab$time <- 1:max(dat[, unlist(input$surv)])
+          predtab$time <- 1:max(dat[, unlist(input$surv)])  # change to rounded value if seq()
         }
         
-        if (input$modeltype>0){
-          
         predtab$CI_l <- with(predtab, L - qnorm(0.975)*L.se)
         predtab$CI_u <- with(predtab, L + qnorm(0.975)*L.se)
         
