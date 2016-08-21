@@ -81,9 +81,8 @@ shinyServer(function(input, output) {
     inFile <- input$file1
     
     if (!is.null(inFile)){
-    selectizeInput('showvars', 
-                   'Displayed columns', 
-                    names(data()),
+    selectizeInput("showvars", label = "Displayed columns", 
+                    choices = names(data()),
                     selected = names(data()), multiple = TRUE)
     } else {
       return()
@@ -91,7 +90,7 @@ shinyServer(function(input, output) {
   })
    
   output$histvar <- renderUI({
-    selectInput("histvar", label = h4("Select Variable"), choices = c('', names(data())),
+    selectInput("histvar", label = tags$b("Select Variable"), choices = c('', names(data())),
                 selected = '')
   })
   
@@ -105,18 +104,15 @@ shinyServer(function(input, output) {
                 selected = '')
   })
   
-  
   output$cen0 <- renderUI({
     selectInput("cen0", label = h5("Censoring Indicator"), choices = c('', names(data())),
                 selected = '')
   })
   
- 
   output$surv <- renderUI({
     selectInput("surv", label = h5("Survival Outcomes"), choices = c('', names(data())),
                 selected = '')
   })
-  
   
   output$cen <- renderUI({
     selectInput("cen", label = h5("Censoring Indicator"), choices = c('', names(data())),
@@ -124,7 +120,7 @@ shinyServer(function(input, output) {
   })
   
   output$covariates <- renderUI({
-  selectizeInput("covariates", label = h5("Multi-select Covariates"), choices = names(data()), multiple = TRUE)
+    selectizeInput("covariates", label = h5("Multi-select Covariates"), choices = names(data()), multiple = TRUE)
   })
   
   output$R <- renderUI({
@@ -155,6 +151,22 @@ shinyServer(function(input, output) {
   
   output$calvars <- renderUI({
     selectizeInput("calvars", label = h5("Select calibration variable(s) from data set"), choices = names(data()), multiple = TRUE)
+  })
+  
+  output$calVarlist <- renderUI({  
+    selectizeInput("calVarlist", label = "Select variable(s) to transform", 
+                   choices = names(data()), multiple = TRUE)
+  })
+  
+  output$calcVars <- renderUI({
+    nvars <- length(unlist(input$calVarlist))
+    if (nvars > 0){
+      lapply(1:nvars, function(i){
+        list(paste0("Enter new expression for '", input$calVarlist[i], "'"), 
+             textInput(paste0("expr", i), label=NA, value=NA))
+      }
+      )
+    }
   })
 
   #-----------
@@ -197,10 +209,30 @@ shinyServer(function(input, output) {
          dat$Pi <- dat[, unlist(input$p2pcal)]
          
          ## all calibration variables available
-         if (input$calib == 0){
-         fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+         if (length(input$calVarlist) == 0){
+            fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
                         data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
-         }
+         
+         ## calculate new variable(s)
+         } else {
+           last <- ncol(dat)
+           exprlist <- list(input$expr1, input$expr2, input$expr3, input$expr4, input$expr5,
+                            input$expr6, input$expr7, input$expr8, input$expr9, input$expr10)
+           
+           for (i in 1:length(input$calVarlist)){
+             # substitute variable for x
+             x <- dat[,input$calVarlist[i]]
+             newvar <- eval(parse(text=unlist(exprlist[[i]])))
+             # insert into dataframe
+             dat[, last + i] <- newvar
+           } 
+           last2 <- ncol(dat)
+           newVarnames <- names(dat)[(last+1):last2]  
+           
+           fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+                          data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = c(newVarnames, input$calvars))
+           
+         } # end else
       }
       
       terms <- c()
@@ -213,7 +245,7 @@ shinyServer(function(input, output) {
         cond <- paste(input$covariates, collapse = ", ")
         tab1txt <- "Table 1. Parameter estimates from "
         if (input$modeltype > 0){
-          out <- paste(c(tab1txt, "additive hazards model: \n lambda(t|", cond, ") = lambda0(t) + b0", terms), collapse="")
+          out <- paste(c(tab1txt, "additive hazards model: lambda(t|", cond, ") = lambda0(t) + b0", terms), collapse="")
         } else {
           out <- paste(c(tab1txt, "proportional hazards model: lambda(t|", cond, ") = lambda0(t)*exp(b0", terms, ")"), collapse="")
         }
@@ -283,41 +315,6 @@ shinyServer(function(input, output) {
       })
       
   }) # end observeEvent
-  
-  #-----------
-  # downloads
-  #-----------
-    
-#     f <- function(a,b,c, ...){
-#       
-#     }
-#   
-#   mydata <- reactive(f(input$seed,
-#                        input$ncases,
-#                        input$branches))
-  
-  # printSummary <- renderPrint({
-  #    tab <- fitModel()
-  # })
-  
-  printSummary <- reactive({
-    # Fetch the appropriate output table, depending on the value
-    # of input$fitModel
-    tab <- input$fitModel
-    data.frame(tab)
-    #data()
-  })
-  
-  output$downloadTab <- downloadHandler(
-    #filename = function() {
-    #  paste('Model_estimates_', Sys.Date(), '.csv', sep='')
-    #},
-    filename = function() {"Model_estimates.csv"},
-    content = function(filename) {
-      write.csv(printSummary(), filename, row.names = F)  # mydata()
-      # https://talesofr.wordpress.com/tag/shiny/
-    }
-  )
   
   #-----------
   # figures

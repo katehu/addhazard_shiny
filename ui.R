@@ -33,8 +33,7 @@ ui <- dashboardPage(
                     delimited text files, as well as SAS, Stata (up to Version 12), and SPSS data sets. 
                     Tools for visualizing distributions and time-to-event trajectories are available to inform 
                     whether hazards are additive or multiplicative, in which case the traditional Cox proportional 
-                    hazards model (Cox, 1972) would be more appropriate. Estimates with model-based or robust 
-                    standard errors and hazard plots may be downloaded for further manipulation.",
+                    hazards model (Cox, 1972) would be more appropriate.",
                     style = "font-family: 'Calibri'; font-size: 14pt"),
   
                   p("Documentation for the associated 'addhazard' R package may be found", 
@@ -101,12 +100,8 @@ ui <- dashboardPage(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
                   numericInput('nbreaks', 'Customize bin width', NA, min = 2, max = 50, step=2, width='150px')
-                  # tags$b("Set histogram color using RGB inputs"),
-                  # sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  # sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  # sliderInput('colB', 'Blue', value=0.5, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
-                  # sliderInput('alpha', 'Opacity', value=0.3, min = 0, max = 1, step=0.1, ticks=F, width='150px')
                 ),
+                
                 mainPanel(
                   plotOutput("hist")
                 )
@@ -115,7 +110,6 @@ ui <- dashboardPage(
                 tabPanel(title='Kaplan-Meier',
                   sidebarPanel(
                     uiOutput("cen0"),
-                    # helpText("Can leave blank if all subjects have an event."),
                     uiOutput("surv0"),
                     checkboxInput('KMconfint', 'Show 95% confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
@@ -192,12 +186,10 @@ ui <- dashboardPage(
                     br(),
                     uiOutput("Rcal"),
                     uiOutput("p2pcal"),
-                    radioButtons('calib', 'Choose one',
-                                 c('All calibration variables available in data set'=0,
-                                   'Some calibration variables available in data set'=1,
-                                   'Need to calculate all calibration variables'=2),
-                                   NA),
-                    uiOutput("calvars")
+                    uiOutput("calvars"),
+                    uiOutput("calVarlist"),
+                    helpText("Leave blank if no calculations are necessary."),
+                    uiOutput("calcVars")
                     )
                   ) # end mainPanel
                   
@@ -211,11 +203,8 @@ ui <- dashboardPage(
           mainPanel(
             br(),
             tags$b(textOutput("modelEq")),
-            tableOutput("regTab"),
-            br(),
-            downloadButton('downloadTab', 'Download Table')
+            tableOutput("regTab")
           ) 
-
          ) # endfluidPage
        ), # end tabItem
 
