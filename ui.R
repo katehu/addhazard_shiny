@@ -40,16 +40,16 @@ ui <- dashboardPage(
                   p("Documentation for the associated 'addhazard' R package may be found", 
                   a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"),
                     "This web app was created with",
-                  a("R", href="http://www.r-project.org"), ",", 
-                  a("Shiny", href="http://shiny.rstudio.com"), ", and",
+                  a("R,", href="http://www.r-project.org"),
+                  a("Shiny,", href="http://shiny.rstudio.com"), " and",
                   a("shinydashboard", href="http://rstudio.github.io/shinydashboard"), 
                     "and includes methodologies from version 2.38 of the",
                   a("survival", href="http://CRAN.R-project.org/package=survival"), 
-                    "R package (Therneau, 2015) and the following 
+                    "R package (Therneau, 2015), as well as the following 
                     for data uploads:",
-                  a("memisc", href="http://CRAN.R-project.org/package=memisc"), ",",
-                  a("xlsx", href="http://CRAN.R-project.org/package=xlsx"), ", and",
-                  a("sas7bdat", href="http://CRAN.R-project.org/package=sas7bdat"), ".", 
+                  a("memisc,", href="http://CRAN.R-project.org/package=memisc"), 
+                  a("xlsx,", href="http://CRAN.R-project.org/package=xlsx"), " and",
+                  a("sas7bdat.", href="http://CRAN.R-project.org/package=sas7bdat"), 
                     style = "font-family: 'Calibri'; font-size: 14pt")
                 )),
 
@@ -100,7 +100,7 @@ ui <- dashboardPage(
                 sidebarPanel(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Number of breaks', NA, min = 2, max = 50, step=2, width='150px')
+                  numericInput('nbreaks', 'Customize bin width', NA, min = 2, max = 50, step=2, width='150px')
                   # tags$b("Set histogram color using RGB inputs"),
                   # sliderInput('colR', 'Red', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
                   # sliderInput('colG', 'Green', value=0, min = 0, max = 1, step=0.1, ticks=F, width='150px'),
@@ -120,7 +120,7 @@ ui <- dashboardPage(
                     checkboxInput('KMconfint', 'Show 95% confidence intervals', FALSE),
                     checkboxInput('KMticks', 'Show censoring times', FALSE),
                     checkboxInput('KMcuminc', 'Plot cumulative incidence', FALSE),
-                    numericInput('KMheight', 'Zoom in', 0, min = 0, max = 1, step=0.1, width='150px'),
+                    numericInput('KMheight', 'Zoom in', 0, min = 0, max = 0.99, step=0.1, width='150px'),
                     uiOutput("KMvar"),
                     checkboxInput('KMbygrp', 'Plot by group', FALSE)
                   ),
@@ -135,7 +135,7 @@ ui <- dashboardPage(
       # Fourth tab content 
       tabItem(tabName ="model",
               fluidPage(
-                withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
+                # withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                 
                 sidebarPanel( 
                   radioButtons('modeltype', 'Choose Model',
@@ -209,11 +209,8 @@ ui <- dashboardPage(
         fluidPage(
           titlePanel("Inference on Coefficients"),
           mainPanel(
-            #br(),
-            #numericInput('numdec', 'Number of decimal places to show', 2, min = 0, max = 10, step=1),
-            textOutput("modelEq"),
             br(),
-            tags$b("Table 1. Parameter estimates with 95% confidence intervals."),
+            tags$b(textOutput("modelEq")),
             tableOutput("regTab"),
             br(),
             downloadButton('downloadTab', 'Download Table')

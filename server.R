@@ -209,19 +209,24 @@ shinyServer(function(input, output) {
       }
     } 
     
-     # output$modelEq <- renderPrint({
     output$modelEq <- renderText({
+        cond <- paste(input$covariates, collapse = ", ")
+        tab1txt <- "Table 1. Parameter estimates from "
         if (input$modeltype > 0){
-          out <- paste(c("lambda(t) = lambda0(t) + b0", terms), collapse="")
+          out <- paste(c(tab1txt, "additive hazards model: \n lambda(t|", cond, ") = lambda0(t) + b0", terms), collapse="")
         } else {
-          out <- paste(c("lambda(t) = lambda0(t)*exp(b0", terms, ")"), collapse="")
+          out <- paste(c(tab1txt, "proportional hazards model: lambda(t|", cond, ") = lambda0(t)*exp(b0", terms, ")"), collapse="")
         }
         print(out)
       })
       
       output$regTab <- renderTable({
         # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
-        summary(fit1)$coef
+        regTab <- summary(fit1)$coef
+        if (input$robust == T){
+          colnames(regTab)[2] <- "robust se"
+        }
+        return(regTab)
       }, digits = 4)
       
       output$modelCovariates <- renderUI({
