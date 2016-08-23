@@ -92,9 +92,9 @@ ui <- dashboardPage(
       
       # Third tab content
       tabItem(tabName ="explore",
-              navbarPage(
+              navbarPage(inverse = T, 
                 title = 'Data Visualization',
-                tabPanel(title='Histogram',
+                tabPanel(title=tags$b('Histogram'),
                 
                 sidebarPanel(
                   uiOutput("histvar"),
@@ -103,11 +103,15 @@ ui <- dashboardPage(
                 ),
                 
                 mainPanel(
-                  plotOutput("hist")
+                  box(
+                    title = "Histogram", status = "primary", solidHeader = TRUE,
+                    collapsible = FALSE, width = 12,
+                    plotOutput("hist")
+                  )
                 )
                 ), # end first tabPanel
               
-                tabPanel(title='Kaplan-Meier',
+                tabPanel(title=tags$b('Kaplan-Meier'), 
                   sidebarPanel(
                     uiOutput("cen0"),
                     uiOutput("surv0"),
@@ -119,9 +123,27 @@ ui <- dashboardPage(
                     checkboxInput('KMbygrp', 'Plot by group', FALSE)
                   ),
                   mainPanel(
-                    plotOutput("KM")
+                    box(
+                      title = "Kaplan-Meier", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 12, 
+                      plotOutput("KM")
+                    )
                   )
-              ) # end second tabPanel
+              ),
+              
+              tabPanel(title=tags$b('Scatter Plot'), 
+                       sidebarPanel(
+                         uiOutput("scatterX"),
+                         uiOutput("scatterY")
+                       ),
+                       mainPanel(
+                         box(
+                           title = "Scatter Plot", status = "primary", solidHeader = TRUE,
+                           collapsible = FALSE, width = 12, 
+                           plotOutput("scatter")
+                         )
+                       )
+              ) # end third tabPanel
                 
             ) # end navbarPage      
       ),
@@ -222,7 +244,11 @@ ui <- dashboardPage(
                   numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1)
                   ),
                 mainPanel(
-                  plotOutput("plotPredHaz")
+                  box(
+                    title = "Predicted Hazards", status = "primary", solidHeader = TRUE,
+                    collapsible = FALSE, width = 12,
+                    plotOutput("plotPredHaz")
+                  )
                 )
         
               ) # end fluidPage

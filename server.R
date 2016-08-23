@@ -109,6 +109,16 @@ shinyServer(function(input, output) {
                 selected = '')
   })
   
+  output$scatterX <- renderUI({
+    selectInput("scatterX", label = h5("X-axis Variable"), choices = c('', names(data())),
+                selected = '')
+  })
+  
+  output$scatterY <- renderUI({
+    selectInput("scatterY", label = h5("Y-axis Variable"), choices = c('', names(data())),
+                selected = '')
+  })
+  
   output$surv <- renderUI({
     selectInput("surv", label = h5("Survival Outcomes"), choices = c('', names(data())),
                 selected = '')
@@ -327,15 +337,12 @@ shinyServer(function(input, output) {
         if (is.na(input$nbreaks)){
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
           probability = input$histprob,
-          col=rgb(0, 0, 0.5, alpha=0.3))
-         # col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
-         
-        
+          col=rgb(0.7, 0, 0.1, alpha=0.2))
+
         } else {
           hist(dat[, unlist(input$histvar)], main=paste("Histogram of", paste(input$histvar)), xlab=paste(input$histvar), 
            probability = input$histprob, breaks = input$nbreaks,
-           col=rgb(0, 0, 0.5, alpha=0.3))
-           # col=rgb(input$colR, input$colG, input$colB, alpha=input$alpha))
+           col=rgb(0.7, 0, 0.1, alpha=0.2))
         }
       } else {
         return(NULL)
@@ -379,5 +386,19 @@ shinyServer(function(input, output) {
        return(NULL)
      }
    })
+   
+   output$scatter <- renderPlot({
+     inFile <- input$file1
+     dat <- data() 
+     
+     if (input$scatterX != "" & input$scatterY != ""){
+       scatter.smooth(dat[,input$scatterX], dat[,input$scatterY], 
+                      lpars = list(col = "red", lwd = 2, lty = 1),
+                      xlab = input$scatterX, ylab = input$scatterY,
+                      main = "Scatter plot with loess smooth")
+     } else {
+       return(NULL)
+     }
+   }) 
   
 }) ## end document
