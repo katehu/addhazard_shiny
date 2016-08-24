@@ -103,7 +103,7 @@ ui <- dashboardPage(
       
       tabItem(tabName ="explore",
               navbarPage(inverse = TRUE, 
-                title = 'Data Visualization',
+                title = 'Data Exploration',
                 tabPanel(title = tags$b('Histogram'),
                 
                 sidebarPanel(
@@ -184,29 +184,29 @@ ui <- dashboardPage(
                   
                   mainPanel(
                   conditionalPanel("input.modeltype == 0",
-                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t)\\exp(\\beta^Tz)$$")),
-                    hr(), hr(), hr(), hr(), br(),
+                    hr(), hr(), hr(), hr(), hr(), br(),
                     box(
                       title = "Additional Settings", status = "primary", solidHeader = TRUE,
                       collapsible = FALSE, width = 6,
+                      withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t)\\exp(\\beta^Tz)$$")),
                       radioButtons('Coxties', h5('Method for Ties'),
                                    c('Efron'='efron',
                                      'Breslow'='breslow',
                                      'Exact'='exact'),
                                      'efron')
                     ),
-                    hr(),
+                    hr(), hr(), hr(),
                     helpText("The Efron approximation is more accurate when there are many tied event times. 
                               All three methods are equivalent if there are no ties, and they are statistically 
                               indistinguishable if the number of ties is small.")
                   ),
                                          
                   conditionalPanel("input.modeltype == 1",
-                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
-                    hr(), hr(), hr(), hr(), br(),                    
+                    hr(), hr(), hr(), hr(), hr(), br(),                    
                     box(
                       title = "Additional Settings", status = "primary", solidHeader = TRUE,
                       collapsible = FALSE, width = 6,
+                      withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                       checkboxInput('ties', 'Ties', TRUE),
                       checkboxInput('wgts', 'Sampling weights used', FALSE),
                       uiOutput("weights")
@@ -214,22 +214,21 @@ ui <- dashboardPage(
                     ),
                   
                   conditionalPanel("input.modeltype == 2",
-                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
-                    hr(), hr(), hr(), hr(), br(),
+                    hr(), hr(), hr(), hr(), hr(), br(),
                     box(
                       title = "Additional Settings", status = "primary", solidHeader = TRUE,
                       collapsible = FALSE, width = 7,
+                      withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                       uiOutput("R"),
                       uiOutput("p2p")
                       )
                     ),
                 
                   conditionalPanel("input.modeltype == 3",
-                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
-                    hr(),                  
                     box(
                       title = "Additional Settings", status = "primary", solidHeader = TRUE,
                       collapsible = FALSE, width = 7,
+                      withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                       uiOutput("Rcal"),
                       uiOutput("p2pcal"),
                       uiOutput("calvars"),
@@ -255,8 +254,12 @@ ui <- dashboardPage(
           titlePanel("Inference on Coefficients"),
           mainPanel(
             br(),
-            uiOutput("modelEq"),
-            tableOutput("regTab")
+            box(
+              title = "Results", status = "primary", solidHeader = TRUE,
+              collapsible = FALSE, width = 11,
+              uiOutput("modelEq"),
+              tableOutput("regTab")
+            )
           ) 
          ) 
        ), 

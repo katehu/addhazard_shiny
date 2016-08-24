@@ -255,13 +255,13 @@ shinyServer(function(input, output) {
         cond <- paste(input$covariates, collapse = ", ")
             tab1txt <- "Table 1. Parameter estimates from "
             if (input$modeltype == 1){
-              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "single-phase additive hazards model.")
+              out <- paste(c("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "single-phase additive hazards model."), collapse = "")
             } else if (input$modeltype == 2){
-              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model.")
+              out <- paste(c("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model."), collapse = "")
             } else if (input$modeltype == 3){
-              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model with calibration.")
+              out <- paste(c("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model with calibration."), collapse = "")
             } else if (input$modeltype == 0){
-              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)\\exp(", terms, ")$$", tab1txt, "proportional hazards model.")
+              out <- paste(c("$$\\lambda(t|", cond, ") = \\lambda_0(t)\\exp(", terms, ")$$", tab1txt, "proportional hazards model."), collapse = "")
             } 
             return(withMathJax(h5(tags$b(helpText(out)))))
       })
@@ -269,7 +269,7 @@ shinyServer(function(input, output) {
       output$regTab <- renderTable({
         # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
         regTab <- summary(fit1)$coef
-        if (input$robust == T){
+        if (input$robust == T & input$modeltype > 0){
           colnames(regTab)[2] <- "robust.se"
         }
         return(regTab)
