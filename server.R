@@ -20,6 +20,7 @@ shinyServer(function(input, output) {
   #-------------
   # data upload
   #-------------
+  
    data  <- reactive({
       inFile <- input$file1
    
@@ -172,7 +173,7 @@ shinyServer(function(input, output) {
     nvars <- length(unlist(input$calVarlist))
     if (nvars > 0){
       lapply(1:nvars, function(i){
-        list(paste0("Enter new expression for '", input$calVarlist[i], "'"), 
+        list(paste0("Enter expression for '", input$calVarlist[i], "'"), 
              textInput(paste0("expr", i), label=NA, value=NA))
       }
       )
@@ -182,6 +183,7 @@ shinyServer(function(input, output) {
   #-----------
   # fit model
   #-----------
+  
   observeEvent(input$fitModel, {
   
     dat <- data() 
@@ -247,26 +249,33 @@ shinyServer(function(input, output) {
       
       terms <- c()
       for (i in 1:length(unlist(input$covariates))){
-        terms[i] <- paste0(" + b", i, "*", unlist(input$covariates[i]))
+        terms[i] <- paste0("+ \\beta_", i, unlist(input$covariates[i]))
+      }
+      if (input$modeltype == 0){
+        terms[1] <- paste0("\\beta_", 1, unlist(input$covariates[1]))
       }
     } 
     
-    output$modelEq <- renderText({
+      output$modelEq <- renderUI({
         cond <- paste(input$covariates, collapse = ", ")
-        tab1txt <- "Table 1. Parameter estimates from "
-        if (input$modeltype > 0){
-          out <- paste(c(tab1txt, "additive hazards model: lambda(t|", cond, ") = lambda0(t) + b0", terms), collapse="")
-        } else {
-          out <- paste(c(tab1txt, "proportional hazards model: lambda(t|", cond, ") = lambda0(t)*exp(b0", terms, ")"), collapse="")
-        }
-        print(out)
+            tab1txt <- "Table 1. Parameter estimates from "
+            if (input$modeltype == 1){
+              out <- paste(c(tab1txt, "single-phase additive hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
+            } else if (input$modeltype == 2){
+              out <- paste(c(tab1txt, "two-phase additive hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
+            } else if (input$modeltype == 3){
+              out <- paste(c(tab1txt, "two-phase additive hazards model with calibration. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
+            } else {
+              out <- paste(c(tab1txt, "proportional hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)\\exp(", terms, ")$$"), collapse="")
+            }
+            return(withMathJax(tags$b(helpText(out))))
       })
       
       output$regTab <- renderTable({
         # headings: coef	 se	 lower.95	 upper.95	 z	 p.value
         regTab <- summary(fit1)$coef
         if (input$robust == T){
-          colnames(regTab)[2] <- "robust se"
+          colnames(regTab)[2] <- "robust.se"
         }
         return(regTab)
       }, digits = 4)
@@ -329,6 +338,7 @@ shinyServer(function(input, output) {
   #-----------
   # figures
   #-----------
+  
    output$hist <- renderPlot({
       inFile <- input$file1
       dat <- data() 

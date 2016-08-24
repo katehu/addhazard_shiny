@@ -166,7 +166,6 @@ ui <- dashboardPage(
                   uiOutput("covariates"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
                   helpText("Uncheck to estimate model-based standard errors."),
-                  br(),
                   actionButton("fitModel", "Fit Model") 
                   ),
                   
@@ -211,7 +210,10 @@ ui <- dashboardPage(
                     uiOutput("calvars"),
                     uiOutput("calVarlist"),
                     helpText("Leave blank if no calculations are necessary."),
-                    uiOutput("calcVars")
+                    uiOutput("calcVars"),
+                    helpText("To transform a variable, enter desired transformation into the pop-up field(s) as a function of x, 
+                             e.g. x^2 to square a variable or sqrt(x) to take its square root. All mathematical
+                             operators in the R language are supported.")
                     )
                   ) # end mainPanel
                   
@@ -224,7 +226,7 @@ ui <- dashboardPage(
           titlePanel("Inference on Coefficients"),
           mainPanel(
             br(),
-            tags$b(textOutput("modelEq")),
+            uiOutput("modelEq"),
             tableOutput("regTab")
           ) 
          ) # endfluidPage
