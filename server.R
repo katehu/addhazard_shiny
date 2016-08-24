@@ -57,18 +57,13 @@ shinyServer(function(input, output) {
    })
   
    output$contents <- renderDataTable({
-        # input$file1 will be NULL initially. After the user selects and uploads a
-        # file, it will be a data frame with 'name', 'size', 'type', and 'datapath'
-        # columns. The 'datapath' column will contain the local filenames where the
-        # data can be found.
-        
         inFile <- input$file1
        
         if (is.null(inFile)){
           return(NULL)
         } else {
           dat <- data()
-          dat <- round(dat, 2) #input$numdec) # later change to user-defined 
+          dat <- round(dat, 2) 
           return(dat[, c(unlist(input$showvars))])
         }
       }, options = list(pageLength = 10, orderClass = TRUE)
@@ -82,7 +77,7 @@ shinyServer(function(input, output) {
     inFile <- input$file1
     
     if (!is.null(inFile)){
-    selectizeInput("showvars", label = "Displayed columns", 
+    selectizeInput("showvars", label = "Displayed Columns", 
                     choices = names(data()),
                     selected = names(data()), multiple = TRUE)
     } else {
@@ -95,38 +90,38 @@ shinyServer(function(input, output) {
                 selected = '')
   })
   
-  output$KMvar <- renderUI({
-    selectInput("KMvar", label = h5("Select Group Variable"), choices = c('', names(data())),
-                selected = '')
-  })
-  
   output$surv0 <- renderUI({
-    selectInput("surv0", label = h5("Survival Outcomes"), choices = c('',names(data())),
+    selectInput("surv0", label = "Follow Up Time", choices = c('',names(data())),
                 selected = '')
   })
   
   output$cen0 <- renderUI({
-    selectInput("cen0", label = h5("Censoring Indicator"), choices = c('', names(data())),
+    selectInput("cen0", label = "Status Indicator", choices = c('', names(data())),
+                selected = '')
+  })
+  
+  output$KMvar <- renderUI({
+    selectInput("KMvar", label = "Select Group Variable", choices = c('', names(data())),
                 selected = '')
   })
   
   output$scatterX <- renderUI({
-    selectInput("scatterX", label = h5("X-axis Variable"), choices = c('', names(data())),
+    selectInput("scatterX", label = "X-axis Variable", choices = c('', names(data())),
                 selected = '')
   })
   
   output$scatterY <- renderUI({
-    selectInput("scatterY", label = h5("Y-axis Variable"), choices = c('', names(data())),
+    selectInput("scatterY", label = "Y-axis Variable", choices = c('', names(data())),
                 selected = '')
   })
   
   output$surv <- renderUI({
-    selectInput("surv", label = h5("Survival Outcomes"), choices = c('', names(data())),
+    selectInput("surv", label = h5("Follow Up Time"), choices = c('', names(data())),
                 selected = '')
   })
   
   output$cen <- renderUI({
-    selectInput("cen", label = h5("Censoring Indicator"), choices = c('', names(data())),
+    selectInput("cen", label = h5("Status Indicator"), choices = c('', names(data())),
                 selected = '')
   })
   
@@ -260,15 +255,15 @@ shinyServer(function(input, output) {
         cond <- paste(input$covariates, collapse = ", ")
             tab1txt <- "Table 1. Parameter estimates from "
             if (input$modeltype == 1){
-              out <- paste(c(tab1txt, "single-phase additive hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
+              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "single-phase additive hazards model.")
             } else if (input$modeltype == 2){
-              out <- paste(c(tab1txt, "two-phase additive hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
+              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model.")
             } else if (input$modeltype == 3){
-              out <- paste(c(tab1txt, "two-phase additive hazards model with calibration. $$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$"), collapse="")
-            } else {
-              out <- paste(c(tab1txt, "proportional hazards model. $$\\lambda(t|", cond, ") = \\lambda_0(t)\\exp(", terms, ")$$"), collapse="")
-            }
-            return(withMathJax(tags$b(helpText(out))))
+              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)", terms, "$$", tab1txt, "two-phase additive hazards model with calibration.")
+            } else if (input$modeltype == 0){
+              out <- paste0("$$\\lambda(t|", cond, ") = \\lambda_0(t)\\exp(", terms, ")$$", tab1txt, "proportional hazards model.")
+            } 
+            return(withMathJax(h5(tags$b(helpText(out)))))
       })
       
       output$regTab <- renderTable({
@@ -364,9 +359,9 @@ shinyServer(function(input, output) {
      dat <- data() 
      
      if (input$surv0 != ""){
-        if (input$KMbygrp==F){
+        if (input$KMbygrp == F){
           KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~ 1")), data=dat)
-          if (input$KMcuminc==F){
+          if (input$KMcuminc == F){
             plot(KMfit, main="Overall Kaplan-Meier Survival Curve", xlab="Time", ylab="Proportion without Event",
                  conf.int=input$KMconfint, mark.time=input$KMticks, ylim=c(input$KMheight, 1))
           } else {
@@ -379,7 +374,7 @@ shinyServer(function(input, output) {
           KMfit <- survfit(as.formula(paste("Surv(", input$surv0, ",", input$cen0, ") ~", input$KMvar)), data=dat)
           ngroups <- length(table(dat[, unlist(input$KMvar)]))
        
-          if (input$KMcuminc==F){
+          if (input$KMcuminc == F){
             plot(KMfit, main=paste("Kaplan-Meier Survival Curves by", paste(input$KMvar)), 
                  xlab="Time", conf.int=input$KMconfint, mark.time=input$KMticks, 
                  ylab="Proportion without Event", ylim=c(input$KMheight, 1), col=1:ngroups)

@@ -6,17 +6,22 @@ ui <- dashboardPage(
   dashboardHeader(title = "Additive Hazards"),
   dashboardSidebar(
     sidebarMenu(
-      menuItem(strong("Intro", style="font-size: 14pt"), tabName = "dashboard", icon = icon("dashboard")),
-      menuItem(strong("Data", style="font-size: 14pt"), tabName = "data", icon = icon("database")),
+      menuItem(strong("README", style="font-size: 14pt"), tabName = "dashboard", icon = icon("map-marker")),
+      menuItem(strong("Upload", style="font-size: 14pt"), tabName = "data", icon = icon("cloud-upload")),
       menuItem(strong("Explore", style="font-size: 14pt"), tabName = "explore", icon = icon("search")),
-      menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("yahoo")),
-      menuItem(strong("Results", style="font-size: 14pt"), tabName = "results", icon = icon("magic")),
-      menuItem(strong("Plots", style="font-size: 14pt"), tabName = "plots", icon = icon("line-chart"))
+      menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("magic")),
+      menuItem(strong("Interpret", style="font-size: 14pt"), tabName = "results", icon = icon("key")),
+      menuItem(strong("Predict", style="font-size: 14pt"), tabName = "plots", icon = icon("line-chart"))
 
   )),
+  
   dashboardBody(
     tabItems(
-      # First tab content
+      
+      #-----------
+      # Intro tab
+      #-----------
+      
       tabItem(tabName = "dashboard",
                 fluidPage(
                   titlePanel("Introduction"),
@@ -52,7 +57,10 @@ ui <- dashboardPage(
                     style = "font-family: 'Calibri'; font-size: 14pt")
                 )),
 
-      # Second tab content
+      #----------
+      # Data tab
+      #----------
+      
       tabItem(tabName = "data",
               fluidPage(
                 titlePanel("Data Upload"),
@@ -65,23 +73,22 @@ ui <- dashboardPage(
                     
                    tags$b("Set File Options"),
                     checkboxInput('header', 'Variable names as headers', TRUE),
-                    radioButtons('sep', 'Field separator character',
+                    radioButtons('sep', h5('Field Separator'),
                                  c(Comma=',',
                                    Semicolon=';',
                                    Tab='\t'),
-                                 ','),
-                    radioButtons('quote', 'Quoting characters',
-                                 c(None='',
-                                   'Double Quote'='"',
-                                   'Single Quote'="'"),
-                                 '"'),
-                    fileInput('file1', 'Choose File (.csv, .xlsx, .txt, .dta, .sav, .sas7bdat)',
+                                   ','),
+                    radioButtons('quote', h5('Quoting Characters'),
+                                 c('Double Quotes'='"',
+                                   'Single Quotes'="'",
+                                   None=''),
+                                   '"'),
+                    fileInput('file1', 'Choose File',
                               accept=c('text/csv',
                                        'text/comma-separated-values,text/plain',
                                        '.csv')),
-                    hr(),
-                    uiOutput("showvars")#,
-                    # numericInput('numdec', 'Number of decimal places', 2, min = 0, max = 10, step=1)
+                    uiOutput("showvars") #,
+                    # helpText("Select and press 'Backspace' to delete variable name(s)")
                   ),
                 
                   mainPanel(
@@ -90,16 +97,19 @@ ui <- dashboardPage(
                )
            ),
       
-      # Third tab content
+      #-------------
+      # Explore tab
+      #-------------
+      
       tabItem(tabName ="explore",
-              navbarPage(inverse = T, 
+              navbarPage(inverse = TRUE, 
                 title = 'Data Visualization',
-                tabPanel(title=tags$b('Histogram'),
+                tabPanel(title = tags$b('Histogram'),
                 
                 sidebarPanel(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Customize bin width', NA, min = 2, max = 50, step=2, width='150px')
+                  numericInput('nbreaks', 'Customize Bin Width', NA, min = 2, max = 50, step=2, width='150px')
                 ),
                 
                 mainPanel(
@@ -109,9 +119,9 @@ ui <- dashboardPage(
                     plotOutput("hist")
                   )
                 )
-                ), # end first tabPanel
+                ), 
               
-                tabPanel(title=tags$b('Kaplan-Meier'), 
+                tabPanel(title = tags$b('Kaplan-Meier'), 
                   sidebarPanel(
                     uiOutput("cen0"),
                     uiOutput("surv0"),
@@ -131,7 +141,7 @@ ui <- dashboardPage(
                   )
               ),
               
-              tabPanel(title=tags$b('Scatter Plot'), 
+              tabPanel(title = tags$b('Scatter Plot'), 
                        sidebarPanel(
                          uiOutput("scatterX"),
                          uiOutput("scatterY")
@@ -143,15 +153,18 @@ ui <- dashboardPage(
                            plotOutput("scatter")
                          )
                        )
-              ) # end third tabPanel
+              ) 
                 
-            ) # end navbarPage      
+            )    
       ),
       
-      # Fourth tab content 
+      #-----------
+      # Model tab
+      #-----------
+      
       tabItem(tabName ="model",
-              fluidPage(
-                # withMathJax(helpText("Additive Hazards Model $$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
+              titlePanel("Data Modeling"),
+              fluidPage(withMathJax(),
                 
                 sidebarPanel( 
                   radioButtons('modeltype', 'Choose Model',
@@ -171,56 +184,72 @@ ui <- dashboardPage(
                   
                   mainPanel(
                   conditionalPanel("input.modeltype == 0",
-                    br(),    
-                    tags$b("Cox Proportional Hazards Model Settings"),
-                    br(), 
-                    radioButtons('Coxties', 'Method for Ties',
-                                 c('Efron'='efron',
-                                   'Breslow'='breslow',
-                                   'Exact'='exact'),
-                                   'efron'),
-                    br(),
+                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t)\\exp(\\beta^Tz)$$")),
+                    hr(), hr(), hr(), hr(), br(),
+                    box(
+                      title = "Additional Settings", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 6,
+                      radioButtons('Coxties', h5('Method for Ties'),
+                                   c('Efron'='efron',
+                                     'Breslow'='breslow',
+                                     'Exact'='exact'),
+                                     'efron')
+                    ),
+                    hr(),
                     helpText("The Efron approximation is more accurate when there are many tied event times. 
                               All three methods are equivalent if there are no ties, and they are statistically 
                               indistinguishable if the number of ties is small.")
                   ),
                                          
                   conditionalPanel("input.modeltype == 1",
-                    br(),              
-                    tags$b("Single-Phase Additive Hazards Model Settings"),
-                    checkboxInput('ties', 'Ties', TRUE),
-                    checkboxInput('wgts', 'Sampling weights used', FALSE),
-                    uiOutput("weights")
+                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
+                    hr(), hr(), hr(), hr(), br(),                    
+                    box(
+                      title = "Additional Settings", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 6,
+                      checkboxInput('ties', 'Ties', TRUE),
+                      checkboxInput('wgts', 'Sampling weights used', FALSE),
+                      uiOutput("weights")
+                      )
                     ),
                   
                   conditionalPanel("input.modeltype == 2",
-                    br(),
-                    tags$b("Two-Phase Additive Hazards Model Settings"),
-                    br(),
-                    uiOutput("R"),
-                    uiOutput("p2p")
+                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
+                    hr(), hr(), hr(), hr(), br(),
+                    box(
+                      title = "Additional Settings", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 7,
+                      uiOutput("R"),
+                      uiOutput("p2p")
+                      )
                     ),
                 
                   conditionalPanel("input.modeltype == 3",
-                    br(),
-                    tags$b("Calibrated Two-Phase Additive Hazards Model Settings"),
-                    br(),
-                    uiOutput("Rcal"),
-                    uiOutput("p2pcal"),
-                    uiOutput("calvars"),
-                    uiOutput("calVarlist"),
-                    helpText("Leave blank if no calculations are necessary."),
-                    uiOutput("calcVars"),
-                    helpText("To transform a variable, enter desired transformation into the pop-up field(s) as a function of x, 
-                             e.g. x^2 to square a variable or sqrt(x) to take its square root. All mathematical
-                             operators in the R language are supported.")
+                    withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
+                    hr(),                  
+                    box(
+                      title = "Additional Settings", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 7,
+                      uiOutput("Rcal"),
+                      uiOutput("p2pcal"),
+                      uiOutput("calvars"),
+                      uiOutput("calVarlist"),
+                      helpText("Leave blank if no calculations needed."),
+                      uiOutput("calcVars"),
+                      helpText("To transform a variable, enter desired transformation into the pop-up field(s) as a function of x, 
+                             e.g.", code("x^2"), "to square a variable or", code("sqrt(x)"), "to take its square root. All mathematical
+                               operators in the R language are supported.")
                     )
-                  ) # end mainPanel
+                  )
+                  ) 
                   
-                ) # end fluidPage
-      ), # end tabItem
+                ) 
+      ), 
       
-      ## Fifth tab content
+      #-------------
+      # Results tab
+      #-------------
+      
       tabItem( tabName = "results",
         fluidPage(
           titlePanel("Inference on Coefficients"),
@@ -229,13 +258,16 @@ ui <- dashboardPage(
             uiOutput("modelEq"),
             tableOutput("regTab")
           ) 
-         ) # endfluidPage
-       ), # end tabItem
+         ) 
+       ), 
 
-      ## Last tab content
+      #-----------
+      # Plots tab
+      #-----------
+      
       tabItem(tabName ="plots",
               fluidPage(
-                titlePanel("Predicted Hazards"),
+                titlePanel("Hazard Prediction"),
                 helpText("This feature is only available for additive hazard models."),
                 sidebarPanel(
                   tags$b("Enter covariate value(s) for hazard prediction"),
@@ -253,8 +285,8 @@ ui <- dashboardPage(
                   )
                 )
         
-              ) # end fluidPage
-      ) # end tabItem
+              ) 
+      ) 
       
      
     ) # end tabItems
