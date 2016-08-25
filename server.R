@@ -15,7 +15,7 @@ library(survival)
 
 ## packages required for file imports: memisc, xlsx, foreign, sas7bdat
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   #-------------
   # data upload
@@ -84,7 +84,10 @@ shinyServer(function(input, output) {
       return()
     }
   })
-   
+  
+  addTooltip(session, "showvars", title = paste0("To hide a data field, click on its name and press the 'Backspace' key."),
+            trigger = "hover", placement = "right", options = list(container = "body"))
+  
   output$histvar <- renderUI({
     selectInput("histvar", label = tags$b("Select Variable"), choices = c('', names(data())),
                 selected = '')
@@ -156,11 +159,11 @@ shinyServer(function(input, output) {
   })
   
   output$calvars <- renderUI({
-    selectizeInput("calvars", label = h5("Select calibration variable(s) from data set"), choices = names(data()), multiple = TRUE)
+    selectizeInput("calvars", label = h5("Select existing variable(s)"), choices = names(data()), multiple = TRUE)
   })
   
   output$calVarlist <- renderUI({  
-    selectizeInput("calVarlist", label = "Select variable(s) to transform", 
+    selectizeInput("calVarlist", label = h5("Select variable(s) to transform"), 
                    choices = names(data()), multiple = TRUE)
   })
   
@@ -174,6 +177,13 @@ shinyServer(function(input, output) {
       )
     }
   })
+  
+  addPopover(session, "calcVars", "", content = paste0("Enter desired transformation as an expression of x, e.g. ", 
+  "x^2 to square a variable or ", "sqrt(x) to take its square root. ",
+  "Other commonly used mathematical operators include '+', '-', '*', and '/' for ",
+  "addition, subtraction, multiplication, and division, respectively."),
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
 
   #-----------
   # fit model

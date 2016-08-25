@@ -1,6 +1,7 @@
 ## app.R ##
 library(shiny)
 library(shinydashboard)
+library(shinyBS)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Additive Hazards"),
@@ -45,8 +46,9 @@ ui <- dashboardPage(
                   a("here.", href="https://cran.r-project.org/web/packages/addhazard/addhazard.pdf"),
                     "This web app was created with",
                   a("R,", href="http://www.r-project.org"),
-                  a("Shiny,", href="http://shiny.rstudio.com"), " and",
-                  a("shinydashboard", href="http://rstudio.github.io/shinydashboard"), 
+                  a("Shiny,", href="http://shiny.rstudio.com"), 
+                  a("shinydashboard", href="http://rstudio.github.io/shinydashboard"), " and",
+                  a("shinyBS", href="http://ebailey78.github.io/shinyBS"), 
                     "and includes methodologies from version 2.38 of the",
                   a("survival", href="http://CRAN.R-project.org/package=survival"), 
                     "R package (Therneau, 2015), as well as the following 
@@ -73,6 +75,9 @@ ui <- dashboardPage(
                     
                    tags$b("Set File Options"),
                     checkboxInput('header', 'Variable names as headers', TRUE),
+                    bsTooltip("header", title = "File options only necessary for .csv and .txt files.",
+                             trigger = "hover", placement = "right", options = list(container = "body")),
+                 
                     radioButtons('sep', h5('Field Separator'),
                                  c(Comma=',',
                                    Semicolon=';',
@@ -87,10 +92,11 @@ ui <- dashboardPage(
                               accept=c('text/csv',
                                        'text/comma-separated-values,text/plain',
                                        '.csv')),
-                    uiOutput("showvars") #,
-                    # helpText("Select and press 'Backspace' to delete variable name(s)")
-                  ),
-                
+                    bsTooltip("file1", title = ".csv, .xlsx, .txt, .dta, .sav, or .sas7bdat",
+                             trigger = "hover", placement = "right", options = list(container = "body")),
+                    uiOutput("showvars")
+                   ),
+        
                   mainPanel(
                     dataTableOutput('contents')
                   )
@@ -109,7 +115,7 @@ ui <- dashboardPage(
                 sidebarPanel(
                   uiOutput("histvar"),
                   checkboxInput('histprob', 'Show density on y-axis', FALSE),
-                  numericInput('nbreaks', 'Customize Bin Width', NA, min = 2, max = 50, step=2, width='150px')
+                  numericInput('nbreaks', 'Number of Bins', NA, min = 2, max = 50, step=2, width='150px')
                 ),
                 
                 mainPanel(
@@ -178,7 +184,8 @@ ui <- dashboardPage(
                   uiOutput("surv"),
                   uiOutput("covariates"),
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
-                  helpText("Uncheck to estimate model-based standard errors."),
+                  bsTooltip("robust", title = "Uncheck to estimate model-based standard errors.",
+                            trigger = "hover", placement = "right", options = list(container = "body")),
                   actionButton("fitModel", "Fit Model") 
                   ),
                   
@@ -193,12 +200,13 @@ ui <- dashboardPage(
                                    c('Efron'='efron',
                                      'Breslow'='breslow',
                                      'Exact'='exact'),
-                                     'efron')
-                    ),
-                    hr(), hr(), hr(),
-                    helpText("The Efron approximation is more accurate when there are many tied event times. 
-                              All three methods are equivalent if there are no ties, and they are statistically 
-                              indistinguishable if the number of ties is small.")
+                                     'efron'),
+                      bsPopover('Coxties', "", content = paste0("The Efron approximation is more accurate ", 
+                                "when there are many tied event times. ", 
+                                "All three methods are equivalent if there are no ties, ", 
+                                "and they are statistically indistinguishable ", "if the number of ties is small."),
+                                trigger = "hover", placement = "right", options = list(container = "body"))
+                  )
                   ),
                                          
                   conditionalPanel("input.modeltype == 1",
@@ -231,13 +239,15 @@ ui <- dashboardPage(
                       withMathJax(helpText("$$\\lambda(t|Z=z) =\\lambda_0(t) + \\beta^Tz$$")),
                       uiOutput("Rcal"),
                       uiOutput("p2pcal"),
+                      tags$b("Calibration Variables"),
                       uiOutput("calvars"),
+                      bsPopover("calvars", "", content = "Leave blank if no variables can be used as-is.",
+                                trigger = "hover", placement = "right", options = list(container = "body")),
+                      
                       uiOutput("calVarlist"),
-                      helpText("Leave blank if no calculations needed."),
-                      uiOutput("calcVars"),
-                      helpText("To transform a variable, enter desired transformation into the pop-up field(s) as a function of x, 
-                             e.g.", code("x^2"), "to square a variable or", code("sqrt(x)"), "to take its square root. All mathematical
-                               operators in the R language are supported.")
+                      bsPopover("calVarlist", "", content = "Leave blank if no calculations are needed.",
+                                trigger = "hover", placement = "right", options = list(container = "body")),
+                      uiOutput("calcVars")
                     )
                   )
                   ) 
@@ -278,7 +288,7 @@ ui <- dashboardPage(
                   br(),
                   uiOutput("modelCovariates"),
                   checkboxInput('predHazCI', 'Show 95% confidence intervals', FALSE),
-                  numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1)
+                  numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1, width = "150px")
                   ),
                 mainPanel(
                   box(
