@@ -85,7 +85,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  addTooltip(session, "showvars", title = paste0("To hide a data field, click on its name and press the 'Backspace' key."),
+  addTooltip(session, "showvars", title = paste0("To hide a data field, click on its name and press the delete key."),
             trigger = "hover", placement = "right", options = list(container = "body"))
   
   output$histvar <- renderUI({
@@ -98,13 +98,20 @@ shinyServer(function(input, output, session) {
                 selected = '')
   })
   
+  addTooltip(session, "surv0", title = "Index date to event or censoring date",
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
   output$cen0 <- renderUI({
     selectInput("cen0", label = "Status Indicator", choices = c('', names(data())),
                 selected = '')
   })
   
+  addTooltip(session, "cen0", title = "0=no event, 1=event",
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
+  
   output$KMvar <- renderUI({
-    selectInput("KMvar", label = "Select Group Variable", choices = c('', names(data())),
+    selectInput("KMvar", label = "Group By Variable", choices = c('', names(data())),
                 selected = '')
   })
   
@@ -286,6 +293,7 @@ shinyServer(function(input, output, session) {
       }, digits = 4)
       
       output$modelCovariates <- renderUI({
+        if (input$modeltype > 0){
         ncov <- length(unlist(input$covariates))
         # define variable ranges
         lapply(1:ncov, function(i){
@@ -293,6 +301,7 @@ shinyServer(function(input, output, session) {
                numericInput(paste0("cov", i), label=NA, value=NA))
           }
         )
+        }
       })
       
       output$plotPredHaz <- renderPlot({

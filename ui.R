@@ -8,7 +8,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem(strong("README", style="font-size: 14pt"), tabName = "dashboard", icon = icon("map-marker")),
-      menuItem(strong("Upload", style="font-size: 14pt"), tabName = "data", icon = icon("cloud-upload")),
+      menuItem(strong("Upload", style="font-size: 14pt"), tabName = "data", icon = icon("upload")),
       menuItem(strong("Explore", style="font-size: 14pt"), tabName = "explore", icon = icon("search")),
       menuItem(strong("Model", style="font-size: 14pt"), tabName = "model", icon = icon("magic")),
       menuItem(strong("Interpret", style="font-size: 14pt"), tabName = "results", icon = icon("key")),
@@ -281,20 +281,27 @@ ui <- dashboardPage(
       tabItem(tabName ="plots",
               fluidPage(
                 titlePanel("Hazard Prediction"),
-                helpText("This feature is only available for additive hazard models."),
                 sidebarPanel(
                   tags$b("Enter covariate value(s) for hazard prediction"),
                   br(),
                   br(),
                   uiOutput("modelCovariates"),
                   checkboxInput('predHazCI', 'Show 95% confidence intervals', FALSE),
-                  numericInput('haztime', 'Timepoint of interest', NA, min = 0, max = NA, step=1, width = "150px")
+                  numericInput('haztime', 'Timepoint of Interest', NA, min = 0, max = NA, step=1, width = "150px")
                   ),
                 mainPanel(
-                  box(
-                    title = "Predicted Hazards", status = "primary", solidHeader = TRUE,
-                    collapsible = FALSE, width = 12,
-                    plotOutput("plotPredHaz")
+                  conditionalPanel("input.modeltype == 0",
+                    hr(),
+                    icon("exclamation-triangle"),
+                    tags$b("This feature is only available for additive hazards models.")
+                  ), 
+                  
+                  conditionalPanel("input.modeltype > 0",
+                    box(
+                      title = "Predicted Hazards", status = "primary", solidHeader = TRUE,
+                      collapsible = FALSE, width = 12,
+                      plotOutput("plotPredHaz")
+                    )
                   )
                 )
         
