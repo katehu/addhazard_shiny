@@ -28,7 +28,7 @@ ui <- dashboardPage(
                   titlePanel("Introduction"),
                   
                   p("This web app is a tool for obtaining parameter estimates from single- and 
-                    two-phase additive hazards models (Lin, 1997) and visualizing predicted individual-specific hazards.
+                    two-phase additive hazards models (Lin, 1994) and visualizing predicted individual-specific hazards.
                     For fitting two-phase models with auxiliary information, it also supports in-app 
                     calculation of calibration variables, which are observed for all subjects and are most
                     useful if correlated with the characteristics additionally ascertained in the
@@ -186,7 +186,8 @@ ui <- dashboardPage(
                   checkboxInput('robust', 'Robust Standard Errors', TRUE),
                   bsTooltip("robust", title = "Uncheck to estimate model-based standard errors.",
                             trigger = "hover", placement = "right", options = list(container = "body")),
-                  actionButton("fitModel", "Fit Model") 
+                  actionButton("fitModel", "Fit Model"),
+                  uiOutput("modFit")
                   ),
                   
                   mainPanel(

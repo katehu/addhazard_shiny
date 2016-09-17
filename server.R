@@ -63,11 +63,22 @@ shinyServer(function(input, output, session) {
           return(NULL)
         } else {
           dat <- data()
-          dat <- round(dat, 2) 
+          
+          ## round numeric variables 
+          for (i in 1:ncol(dat)){
+            if (is.numeric(dat[,i])){
+              dat[,i] <- round(dat[,i], 2)
+            }
+          }
+          
           return(dat[, c(unlist(input$showvars))])
         }
       }, options = list(pageLength = 10, orderClass = TRUE)
    )
+   
+   addPopover(session, "contents", "", content = paste0("Click on an arrow to the right of a column name to sort column in ascending or descending order. ", 
+                                                        "Enter a value into the box under the column of interest to display only rows containing that value."),
+              trigger = "hover", placement = "left", options = list(container = "body"))
   
   #------------
   # variables
@@ -115,6 +126,10 @@ shinyServer(function(input, output, session) {
                 selected = '')
   })
   
+  addTooltip(session, "KMvar", title = "Must be a categorical variable",
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
+  
   output$scatterX <- renderUI({
     selectInput("scatterX", label = "X-axis Variable", choices = c('', names(data())),
                 selected = '')
@@ -138,6 +153,10 @@ shinyServer(function(input, output, session) {
   output$covariates <- renderUI({
     selectizeInput("covariates", label = h5("Multi-select Covariates"), choices = names(data()), multiple = TRUE)
   })
+  
+  addPopover(session, "covariates", "", content = "To exclude a selected covariate, click on its name and press the delete key.",
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
   
   output$R <- renderUI({
     selectInput("R", label = h5("Phase II Membership"), choices = c('', names(data())),
@@ -292,6 +311,8 @@ shinyServer(function(input, output, session) {
         return(regTab)
       }, digits = 4)
       
+      output$modFit <- renderText("Model fitted. Please see next page for results.")
+    
       output$modelCovariates <- renderUI({
         if (input$modeltype > 0){
         ncov <- length(unlist(input$covariates))
