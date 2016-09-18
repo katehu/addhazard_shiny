@@ -1,12 +1,12 @@
 # setwd("/Users/kate.hu/addhazard_shiny") 
 
-sourceDir <- function(path, trace = TRUE, ...) {
-  for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
-    if(trace) cat(nm,":")           
-    source(file.path(path, nm), ...)
-    if(trace) cat("\n")
-  }
-}
+# sourceDir <- function(path, trace = TRUE, ...) {
+#   for (nm in list.files(path, pattern = "\\.[RrSsQq]$")) {
+#     if(trace) cat(nm,":")           
+#     source(file.path(path, nm), ...)
+#     if(trace) cat("\n")
+#   }
+# }
 # sourceDir("/Users/kate.hu/Documents/ah/R",trace=TRUE)
 library(shiny)
 # library(xtable)
@@ -135,10 +135,17 @@ shinyServer(function(input, output, session) {
                 selected = '')
   })
   
+  addTooltip(session, "scatterX", title = paste0("Must be a continuous variable"),
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
   output$scatterY <- renderUI({
     selectInput("scatterY", label = "Y-axis Variable", choices = c('', names(data())),
                 selected = '')
   })
+  
+  addTooltip(session, "scatterY", title = paste0("Must be a continuous variable"),
+             trigger = "hover", placement = "right", options = list(container = "body"))
+  
   
   output$surv <- renderUI({
     selectInput("surv", label = h5("Follow Up Time"), choices = c('', names(data())),
@@ -231,20 +238,26 @@ shinyServer(function(input, output, session) {
       ## additive hazards model
       } else if (input$modeltype == 1){
          if (input$wgts == T){
-          dat$w <- dat[, unlist(input$weights)]
-          fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
-                    data=dat, robust=input$robust, ties=input$ties, weights=w)
+            dat$w <- dat[, unlist(input$weights)]
+            fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+                       data=dat, robust=input$robust, ties=input$ties, weights=w)
          } else {
-           fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
-                     data=dat, robust=input$robust, ties=input$ties)
+            fit1 <- ah(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+                       data=dat, robust=input$robust, ties=input$ties)
          }
         
       ## additive hazards model with 2-phase sampling
       } else if (input$modeltype == 2) {
          dat$R <- dat[, unlist(input$R)]            
          dat$Pi <- dat[, unlist(input$p2p)]
+         
+         # model for inference
          fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
                         data=dat, robust=input$robust, R=R, Pi=Pi)
+         
+         # model for prediction
+         fit2 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ",paste(input$covariates,collapse="+"))),
+                        data=dat, robust=F, R=R, Pi=Pi)
       
       ## additive hazards model with 2-phase sampling and calibration
       } else if (input$modeltype == 3) {
@@ -253,9 +266,14 @@ shinyServer(function(input, output, session) {
          
          ## all calibration variables available
          if (length(input$calVarlist) == 0){
+            # model for inference
             fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
-                        data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
-         
+                           data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
+            
+            # model for prediction 
+            fit2 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+                           data=dat, robust=F, R=R, Pi=Pi, calibration.variables = unlist(input$calvars))
+              
          ## calculate new variable(s)
          } else {
            last <- ncol(dat)
@@ -272,8 +290,13 @@ shinyServer(function(input, output, session) {
            last2 <- ncol(dat)
            newVarnames <- names(dat)[(last+1):last2]  
            
+           # model for inference
            fit1 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
                           data=dat, robust=input$robust, R=R, Pi=Pi, calibration.variables = c(newVarnames, input$calvars))
+           
+           # model for prediction
+           fit2 <- ah.2ph(as.formula(paste("Surv(", input$surv,",", input$cen,") ~ ", paste(input$covariates,collapse="+"))),
+                          data=dat, robust=F, R=R, Pi=Pi, calibration.variables = c(newVarnames, input$calvars))
            
          } # end else
       }
@@ -339,8 +362,14 @@ shinyServer(function(input, output, session) {
         vars <- paste(vartab[,1], "=", vartab[,2], sep='')
         vars <- paste(vars, collapse = ", ")
        
+        if (input$modeltype %in% 0:1){
+          predfit <- fit1
+        } else if (input$modeltype %in% 2:3){
+          predfit <- fit2
+        }
+        
         #predtab <- predict(fit1, newdata, newtime = seq(0.1, 20, by=0.1))
-        predtab <- predict(fit1, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
+        predtab <- predict(predfit, newdata, newtime = 1:max(dat[, unlist(input$surv)], na.rm=T))
         if (!("time" %in% names(predtab))){
           predtab$time <- 1:max(dat[, unlist(input$surv)])  # change to rounded value if seq()
         }
